@@ -1,3 +1,0 @@
-[submodule "riscv-pk"]
-	path = riscv-pk
-	url = https://github.com/ring00/riscv-pk.git
