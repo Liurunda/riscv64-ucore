@@ -1,5 +1,5 @@
-# lab0  0/n 概览
+# lab0  0/3 概览
 
-1. ucore的历史
-2. ucore step by step 指导书的架构
-3. 工作环境的搭建
+1. 溯源: ucore的历史
+2. 概览: ucore step by step 指导书的架构
+3. 开搞: 工作环境的搭建
