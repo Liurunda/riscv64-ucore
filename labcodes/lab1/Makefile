@@ -130,8 +130,11 @@ $(call create_target,kernel)
 # create ucore.img
 UCOREIMG	:= $(call totarget,ucore.img)
 
+# $(UCOREIMG): $(kernel)
+#	cd ../../riscv-pk && rm -rf build && mkdir build && cd build && ../configure --prefix=$(RISCV) --host=riscv64-unknown-elf --with-payload=../../labcodes/$(PROJ)/$(kernel)  --disable-fp-emulation && make && cp bbl ../../labcodes/$(PROJ)/$(UCOREIMG)
+
 $(UCOREIMG): $(kernel)
-	cd ../../riscv-pk && rm -rf build && mkdir build && cd build && ../configure --prefix=$(RISCV) --host=riscv64-unknown-elf --with-payload=../../labcodes/$(PROJ)/$(kernel)  --disable-fp-emulation && make && cp bbl ../../labcodes/$(PROJ)/$(UCOREIMG)
+	$(OBJCOPY) $(kernel) --strip-all -O binary $@
 
 $(call create_target,ucore.img)
 
@@ -158,7 +161,12 @@ TARGETS: $(TARGETS)
 
 .PHONY: qemu spike
 qemu: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
-	$(V)$(QEMU) -kernel $(UCOREIMG) -nographic
+#	$(V)$(QEMU) -kernel $(UCOREIMG) -nographic
+	$(V)$(QEMU) \
+		-machine virt \
+		-nographic \
+		-bios default \
+		-device loader,file=$(UCOREIMG),addr=0x80200000
 
 spike: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
 	$(V)$(SPIKE) $(UCOREIMG)
