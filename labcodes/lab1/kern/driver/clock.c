@@ -2,6 +2,7 @@
 #include <defs.h>
 #include <sbi.h>
 #include <stdio.h>
+#include <riscv.h>
 
 volatile size_t ticks;
 
@@ -32,6 +33,8 @@ static uint64_t timebase = 100000;
  * and then enable IRQ_TIMER.
  * */
 void clock_init(void) {
+    // enable timer interrupt in sie
+    set_csr(sie, MIP_STIP);
     // divided by 500 when using Spike(2MHz)
     // divided by 100 when using QEMU(10MHz)
     // timebase = sbi_timebase() / 500;
