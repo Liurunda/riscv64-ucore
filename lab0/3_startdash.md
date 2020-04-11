@@ -72,7 +72,7 @@ $ qemu-system-riscv64 \
   --bios default
 
 OpenSBI v0.4 (Jul  2 2019 11:53:53)
-____                    _____ ____ _____
+   ____                    _____ ____ _____
   / __ \                  / ____|  _ \_   _|
  | |  | |_ __   ___ _ __ | (___ | |_) || |
  | |  | | '_ \ / _ \ '_ \ \___ \|  _ < | |
@@ -93,9 +93,10 @@ PMP0: 0x0000000080000000-0x000000008001ffff (A)
 PMP1: 0x0000000000000000-0xffffffffffffffff (A,R,W,X)
 ```
 
-可以看到我们已经在 `qemu-system-riscv64` 模拟的 `virt machine` 硬件上将 `OpenSBI` 这个固件（ firmwire） 跑起来了。Qemu 可以使用 `Ctrl+a` 再按下 `x` 退出。
+可以看到我们已经在 `qemu-system-riscv64` 模拟的 `virt machine` 硬件上将 `OpenSBI` 这个固件 跑起来了。Qemu 可以使用 `Ctrl+a` 再按下 `x` 退出。
 
 > **扩展**
+>
 > 如果对 `OpenSBI` 的内部实现感兴趣，可以看看[RISCV OpenSBI Deep_Dive 介绍文档][riscv_opensbi_deep_dive]。
 
 [riscv_opensbi_deep_dive]: https://content.riscv.org/wp-content/uploads/2019/06/13.30-RISCV_OpenSBI_Deep_Dive_v5.pdf
