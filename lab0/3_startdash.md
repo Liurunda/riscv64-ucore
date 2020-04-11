@@ -41,11 +41,7 @@ $ export PATH=$PWD/riscv32-softmmu:$PWD/riscv64-softmmu:$PATH
 
 可查看[更详细的安装和使用命令][riscv-qemu]。
 
-同时，我们在每次开机之后要使用此命令来允许模拟器过量使用内存（不是必须的），否则无法正常使用 Qemu：
 
-```bash
-$ sudo sysctl vm.overcommit_memory=1
-```
 
 如果你在使用 macOS，只需要 Homebrew 一个命令即可：
 
@@ -94,6 +90,12 @@ PMP1: 0x0000000000000000-0xffffffffffffffff (A,R,W,X)
 ```
 
 可以看到我们已经在 `qemu-system-riscv64` 模拟的 `virt machine` 硬件上将 `OpenSBI` 这个固件 跑起来了。Qemu 可以使用 `Ctrl+a` 再按下 `x` 退出。
+
+如果无法正常使用 Qemu，可以尝试下面这个命令。
+
+```bash
+$ sudo sysctl vm.overcommit_memory=1
+```
 
 > **扩展**
 >
