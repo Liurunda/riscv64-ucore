@@ -8,7 +8,15 @@ ucore麻雀虽小，五脏俱全。此“麻雀”包含虚拟内存管理、进
 
 ucore也并不完美。x86指令集架构历史包袱多, 虽然在PC平台上占据绝对主流，但用于教学的时候总有些累赘。
 
-年轻的精简指令集架构RISC-V，设计优雅，简洁明了，开源共享，为计算机组成原理和操作系统课程的教学提供了一种新思路，并且在嵌入式领域异军突起。嵌入式领域的巨头ARM公司受到威胁后，上线了一个网站riscv-basics.com，把RISC-V批判了一番，批判的方面包括：成本、生态系统、碎片化风险、安全性问题、设计验证。但最终迫于业界舆论恶评，ARM关闭了该网站。（cited from [Wikipedia](https://zh.wikipedia.org/wiki/RISC-V#历史)）
+> 趣闻
+>
+> Intel曾经在1989到2000年之间开发过一种[Itanium](https://en.wikipedia.org/wiki/Itanium)处理器，它基于全新的IA-64架构, 但这个指令集/处理器产品线以失败告终。其中一个失败原因就是向后兼容性太差，2001年有人测试在Itanium处理器上运行原先的x86软件时，性能仅为同时代x86奔腾处理器的十分之一。
+
+年轻的精简指令集架构RISC-V(reduced instruction set computer V)，设计优雅，简洁明了，开源共享，为计算机组成原理和操作系统课程的教学提供了一种新思路。
+
+> 趣闻
+>
+> RISCV在嵌入式领域异军突起。嵌入式领域的巨头ARM公司受到威胁后，上线了一个网站riscv-basics.com，把RISC-V批判了一番，批判的方面包括：成本、生态系统、碎片化风险、安全性问题、设计验证。但最终迫于业界舆论恶评，ARM关闭了该网站。（cited from [Wikipedia: RISCV](https://zh.wikipedia.org/wiki/RISC-V#历史)）
 
 我们将ucore的代码移植到64位的RISC-V指令集架构，并借鉴[rcore tutorial](https://rcore-os.github.io/rCore_tutorial_doc/)的做法，改进实验指导书。
 
