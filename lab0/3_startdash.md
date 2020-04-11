@@ -1,40 +1,104 @@
 # lab0  3/3 开搞：搭建实验环境
 
-现在让我们搭建基于riscv64的操作系统的开发环境。
+说了这么多，现在该动手了。Make your hands dirty!
 
-提示1：如果你使用windows系统，那么建议在windows subsystem for linux（WSL) 下进行开发。
+如果你使用windows系统，推荐在windows subsystem for linux（WSL) 下进行开发。
 
-提示2：我们推荐你在系统里设置一个叫做**RISCV**的环境变量(在bash命令里通过**$RISCV**使用)，作为你安装所有和riscv有关的软件的路径。
+方便起见，可以先在终端里设置一个叫做**RISCV**的环境变量(在bash命令里可以通过**$RISCV**使用)，作为你安装所有和riscv有关的软件的路径。在`/etc/profile`里面写一行`export RISCV=/usr/local/riscv`之类的东西就行。
 
-理论上最小的软件开发环境只需要：能够编译程序，能够运行程序。系统软件也不例外。
+最小的软件开发环境需要：能够编译程序，能够运行程序。开发操作系统这样的系统软件也不例外。
 
-问题在于：我们使用的计算机都是基于x86架构的。如何把程序编译到riscv64架构的汇编？这需要我们使用“目标语言为riscv64汇编的编译器”，在我们的电脑上进行**交叉编译**。如何运行riscv64的程序？这需要我们使用**模拟器**，也就是在x86架构的计算机上，通过软件模拟一个riscv64架构的硬件平台。
+## 编译器
 
-放心，不需要你自己写编译器或者造计算机。我们使用现有的riscv-gcc编译器即可。从https://github.com/riscv/riscv-gcc clone下来，然后在x86架构上编译你的riscv-gcc编译器为可执行的x86程序，就可以通过运行它，来把你的程序编译成riscv架构的可执行文件了。这有点绕口，理解起来需要一点编译原理的基础。
+问题在于：我们使用的计算机都是基于x86架构的。如何把程序编译到riscv64架构的汇编？这需要我们使用“目标语言为riscv64机器码的编译器”，在我们的电脑上进行**交叉编译**。
 
-其实没必要那么麻烦，你大可使用别人已经编译好的编译器的可执行文件，也就是所谓的**预编译（prebuilt）**版本，下载下来，放在你喜欢的地方，配好路径（把编译器的位置加到系统的PATH环境变量里），就能在终端使用了。我们推荐使用sifive公司提供的预编译工具链，进入 https://www.sifive.com/boards ，找到 “Prebuilt RISC‑V GCC Toolchain and Emulator”，下载“GNU Embedded Toolchain ”中适合你的操作系统的版本即可。
+放心，这里不需要你自己写编译器。我们使用现有的riscv-gcc编译器即可。从https://github.com/riscv/riscv-gcc clone下来，然后在x86架构上编译riscv-gcc编译器为可执行的x86程序，就可以运行它，来把你的程序源代码编译成riscv架构的可执行文件了。这有点像绕口令，但只要有一点编译原理的基础就可以理解。不过，这个riscv-gcc仓库很大，而且自己编译工具链总是一件麻烦的事。
 
-关于模拟器，我们给出使用spike的解决方案。
+其实，没必要那么麻烦，我们大可以使用别人已经编译好的编译器的可执行文件，也就是所谓的**预编译（prebuilt）**工具链，下载下来，放在你喜欢的地方（比如之前定义的**\$RISCV**），配好路径（把编译器的位置加到系统的**PATH**环境变量里, 具体做法可以百度一下），就能在终端使用了。我们推荐使用sifive公司提供的预编译工具链，进入 https://www.sifive.com/boards ，找到 “Prebuilt RISC‑V GCC Toolchain and Emulator”，下载“GNU Embedded Toolchain ”中适合你的操作系统的版本即可。(注意，如果你是wsl, 需要下载适合ubuntu版本的编译器)
 
-从 https://github.com/riscv/riscv-isa-sim 把spike模拟器的源代码clone下来，然后照着它的提示做：
+配置好后，在终端输入`riscv64-unknown-elf-gcc -v`查看安装的gcc版本, 如果输出一大堆东西且最后一行有`gcc version 某个数字.某个数字.某个数字`，说明gcc配置成功，否则需要检查一下哪里做错了，比如环境变量**PATH**配置是否正确。一般需要把一个形如`..../bin`的目录加到**PATH**里。 
 
-```bash
-$ [sudo] apt-get install device-tree-compiler
-$ mkdir build
-$ cd build
-$ ../configure --prefix=$RISCV
-$ make
-$ [sudo] make install 
+## 模拟器
+
+如何运行riscv64的程序？我们当然可以给大家每个人发一块riscv64架构处理器的开发板，再给大家一人一根JTAG线，让大家把程序烧写到上面去跑，然后各凭本事debug。但还是使用**模拟器（emulator）**更方便一些，也就是在x86架构的计算机上，通过软件模拟一个riscv64架构的硬件平台，从而能够运行riscv64的目标代码。
+
+我们选择的是QEMU模拟器。它的优点在于，内置了一套OpenSBI固件的实现，可以简化我们的代码。
+
+下面我们从[rCore tutorial](https://rcore-os.github.io/rCore_tutorial_doc/chapter2/part5.html)抄写了一段qemu安装的教程。
+
+### 安装模拟器 Qemu
+
+如果你在使用 Linux (Ubuntu) ，需要到 Qemu 官方网站下载源码并自行编译，因为 Ubuntu 自带的软件包管理器 `apt` 中的 Qemu 的版本过低无法使用。参考命令如下：
+
+```sh
+$ wget https://download.qemu.org/qemu-4.1.1.tar.xz
+$ tar xvJf qemu-4.1.1.tar.xz
+$ cd qemu-4.1.1
+$ ./configure --target-list=riscv32-softmmu,riscv64-softmmu
+$ make -j
+$ export PATH=$PWD/riscv32-softmmu:$PWD/riscv64-softmmu:$PATH
 ```
 
-[sudo]表示这个sudo是可选的。如果你不使用sudo的时候出现了“Permission Denied”之类的失败提示，那就在bash命令前面加上sudo再试试。（"sudo试试"有的时候和"重启试试"一样管用）
+可查看[更详细的安装和使用命令][riscv-qemu]。
 
-注意这里用到了环境变量 **RISCV**。如果你不想定义这么一个环境变量，也可以在用到这个环境变量的地方手动替换成你想安装riscv相关软件（或者说，“工具链”）的路径。
+同时，我们在每次开机之后要使用此命令来允许模拟器过量使用内存（不是必须的），否则无法正常使用 Qemu：
 
-比如: `../configure --prefix=/usr/local/bin/riscv`
+```bash
+$ sudo sysctl vm.overcommit_memory=1
+```
 
-注意在做这一步的时候，环境变量**RISCV**(或者上面的`/usr/local/bin/riscv`或者其他什么路径)应该是一个存在的路径。
+如果你在使用 macOS，只需要 Homebrew 一个命令即可：
 
-另外，我们还需要配置riscv-pk.
+```sh
+$ brew install qemu
+```
 
-....todo...
+最后确认一下 Qemu 已经安装好，且版本在 4.1.0 以上：
+
+```bash
+$ qemu-system-riscv64 --version
+QEMU emulator version 4.1.1
+Copyright (c) 2003-2019 Fabrice Bellard and the QEMU Project developers
+```
+
+### 使用 OpenSBI
+
+新版 Qemu 中内置了 [OpenSBI][opensbi] 固件（firmware），它主要负责在操作系统运行前的硬件初始化和加载操作系统的功能。我们使用以下命令尝试运行一下：
+
+```bash
+$ qemu-system-riscv64 \
+  --machine virt \
+  --nographic \
+  --bios default
+
+OpenSBI v0.4 (Jul  2 2019 11:53:53)
+____                    _____ ____ _____
+  / __ \                  / ____|  _ \_   _|
+ | |  | |_ __   ___ _ __ | (___ | |_) || |
+ | |  | | '_ \ / _ \ '_ \ \___ \|  _ < | |
+ | |__| | |_) |  __/ | | |____) | |_) || |_
+  \____/| .__/ \___|_| |_|_____/|____/_____|
+        | |
+        |_|
+
+Platform Name          : QEMU Virt Machine
+Platform HART Features : RV64ACDFIMSU
+Platform Max HARTs     : 8
+Current Hart           : 0
+Firmware Base          : 0x80000000
+Firmware Size          : 112 KB
+Runtime SBI Version    : 0.1
+
+PMP0: 0x0000000080000000-0x000000008001ffff (A)
+PMP1: 0x0000000000000000-0xffffffffffffffff (A,R,W,X)
+```
+
+可以看到我们已经在 `qemu-system-riscv64` 模拟的 `virt machine` 硬件上将 `OpenSBI` 这个固件（ firmwire） 跑起来了。Qemu 可以使用 `Ctrl+a` 再按下 `x` 退出。
+
+> **扩展**
+> 如果对 `OpenSBI` 的内部实现感兴趣，可以看看[RISCV OpenSBI Deep_Dive 介绍文档][riscv_opensbi_deep_dive]。
+
+[riscv_opensbi_deep_dive]: https://content.riscv.org/wp-content/uploads/2019/06/13.30-RISCV_OpenSBI_Deep_Dive_v5.pdf
+[riscv-qemu]: https://github.com/riscv/riscv-qemu/wiki
+[opensbi]: https://github.com/riscv/opensbi
+
