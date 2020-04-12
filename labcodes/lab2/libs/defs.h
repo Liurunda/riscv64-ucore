@@ -34,7 +34,7 @@ typedef unsigned long uint_fast32_t;
 typedef unsigned long long uint_fast64_t;
 
 /* *
- * Pointers and addresses are 32 bits long.
+ * Pointers and addresses are 64 bits long.
  * We use pointer types to represent addresses,
  * uintptr_t to represent the numerical values of addresses.
  * */
