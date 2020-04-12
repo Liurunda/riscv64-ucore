@@ -96,20 +96,14 @@ size_t nr_free_pages(void) {
 
 /* pmm_init - initialize the physical memory management */
 static void page_init(void) {
-    memory_block_info info;
-    uint32_t hart_id = sbi_hart_id();
-    if (sbi_query_memory(hart_id, &info) != 0) {
-        panic("failed to get physical memory size info!\n");
-    }
+    va_pa_offset = PHYSICAL_MEMORY_OFFSET;
 
-    va_pa_offset = KERNBASE - info.base;
-
-    uint32_t mem_begin = info.base;
-    uint32_t mem_size = info.size;
-    uint32_t mem_end = mem_begin + mem_size;
+    uint64_t mem_begin = KERNEL_BEGIN_PADDR;
+    uint64_t mem_size = PHYSICAL_MEMORY_END - KERNEL_BEGIN_PADDR;
+    uint64_t mem_end = PHYSICAL_MEMORY_END;
 
     cprintf("physcial memory map:\n");
-    cprintf("  memory: 0x%08lx, [0x%08lx, 0x%08lx].\n", mem_size, mem_begin,
+    cprintf("  memory: 0x%016lx, [0x%016lx, 0x%016lx].\n", mem_size, mem_begin,
             mem_end - 1);
 
     uint64_t maxpa = mem_end;
@@ -196,7 +190,7 @@ void pmm_init(void) {
     // use pmm->check to verify the correctness of the alloc/free function in a
     // pmm
     check_alloc_page();
-
+/*
     // create boot_pgdir, an initial page directory(Page Directory Table, PDT)
     boot_pgdir = boot_alloc_page();
     memset(boot_pgdir, 0, PGSIZE);
@@ -204,7 +198,7 @@ void pmm_init(void) {
 
     check_pgdir();
 
-    static_assert(KERNBASE % PTSIZE == 0 && KERNTOP % PTSIZE == 0);
+    // static_assert(KERNBASE % PTSIZE == 0 && KERNTOP % PTSIZE == 0);
 
     // recursively insert boot_pgdir in itself
     // to form a virtual page table at virtual address VPT
@@ -218,13 +212,6 @@ void pmm_init(void) {
     boot_map_segment(boot_pgdir, KERNBASE, KMEMSIZE, PADDR(KERNBASE),
                      READ_WRITE_EXEC);
 
-    // IMPORTANT !!!
-    // Map last page to make SBI happy
-    pde_t *sptbr = KADDR(read_csr(sptbr) << PGSHIFT);
-    pte_t *sbi_pte = get_pte(sptbr, 0xFFFFFFFF, 0);
-    boot_map_segment(boot_pgdir, (uintptr_t)(-PGSIZE), PGSIZE,
-                     PTE_ADDR(*sbi_pte), READ_EXEC);
-
     enable_paging();
 
     // now the basic virtual memory map(see memalyout.h) is established.
@@ -232,6 +219,7 @@ void pmm_init(void) {
     check_boot_pgdir();
 
     print_pgdir();
+*/
 }
 
 // get_pte - get pte and return the kernel virtual address of this pte for la
