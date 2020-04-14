@@ -11,5 +11,4 @@
   - ["真正的"入口点](lab0.5/3_kern_init.md)
   - [从SBI到stdio](lab0.5/4_sbi_io.md)
   - [Just make it](lab0.5/5_makeit.md)
-
-[lab1: 断, 都可以断](lab1/intro.md)
+- [lab1: 断, 都可以断](lab1/intro.md)
