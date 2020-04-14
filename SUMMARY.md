@@ -10,4 +10,4 @@
   - [链接脚本和入口点](lab1/2_linkerscript.md)
   - ["真正的"入口点](lab1/3_kern_init.md)
   - [从SBI到stdio](lab1/4_sbi_io.md)
-  - [Just make it](lab1/5_makeit)
+  - [Just make it](lab1/5_makeit.md)
