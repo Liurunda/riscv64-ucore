@@ -1,0 +1,11 @@
+{
+  "plugins": [
+    "-highlight",
+    "prism"
+  ],
+  "pluginsConfig": {
+    "prism": {
+      "css": ["prismjs/themes/prism-tomorrow.css"]
+    }
+  }
+}
