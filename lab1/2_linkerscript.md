@@ -92,11 +92,11 @@ kern_entry:
 
 #开始data section
 .section .data
-    .align PGSHIFT
-    .global bootstack #分配内核栈
+    .align PGSHIFT #按照2^PGSHIFT进行地址对齐, 也就是对齐到下一页 PGSHIFT在 mmu.h定义
+    .global bootstack #内核栈
 bootstack:
-    .space KSTACKSIZE #预留栈空间
-    .global bootstacktop
+    .space KSTACKSIZE #留出KSTACKSIZE这么多个字节的内存
+    .global bootstacktop #之后内核栈将要从高地址向低地址增长, 初始时的内核栈为空
 bootstacktop:                              
 ```
 
