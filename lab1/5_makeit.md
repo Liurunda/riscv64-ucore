@@ -10,7 +10,7 @@
 
 它输出一行`(THU.CST) os is loading`, 然后进入死循环。
 
-目前为止的代码可以在[]()找到，遇到困难可以参考。
+目前为止的代码可以在[这里](https://github.com/Liurunda/riscv64-ucore/tree/lab0/lab0)找到，遇到困难可以参考。
 
 
 
