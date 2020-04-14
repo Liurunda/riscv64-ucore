@@ -7,7 +7,7 @@
   - [开搞: 实验环境搭建](lab0/3_startdash.md)
 - [lab1: 断, 都可以断](lab1/intro.md)
   - [内存布局，OpenSBI，elf和bin](lab1/1_layout.md)
-  - [链接脚本，入口点](lab1/2_linkerscript.md)
+  - [链接脚本和入口点](lab1/2_linkerscript.md)
   - ["真正的"入口点](lab1/3_kern_init.md)
   - [从SBI到stdio](lab1/4_sbi_io.md)
-  - 
+  - [Just make it](lab1/5_makeit)
