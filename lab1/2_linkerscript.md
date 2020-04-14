@@ -10,12 +10,11 @@ gnu工具链中，包含一个链接器`ld`
 
 下面给出我们使用的链接脚本
 
-```ld
+```cpp
 /* tools/kernel.ld */
 
 OUTPUT_ARCH(riscv) /* 指定输出文件的指令集架构, 在riscv平台上运行 */
-ENTRY(kern_entry)  /* 指定程序的入口点, 是一个叫做kern_entry的符号。
-我们之后会在汇编代码里定义kern_entry这个符号, 并使他恰好在0x80200000的内存位置 。*/
+ENTRY(kern_entry)  /* 指定程序的入口点, 是一个叫做kern_entry的符号。我们之后会在汇编代码里定义它*/
 
 BASE_ADDRESS = 0x80200000;/*定义了一个变量BASE_ADDRESS并初始化 */
 
@@ -31,7 +30,8 @@ SECTIONS
 	 那么这个section就被加到输出文件的text这个section里
 	 输入文件中section的名称,有些是编译器自动生成的,有些是我们自己定义的*/
     .text : {
-        *(.text.kern_entry .text .stub .text.* .gnu.linkonce.t.*)
+        *(.text.kern_entry) /*把输入中kern_entry这一段放到输出中text的开头*/
+        *(.text .stub .text.* .gnu.linkonce.t.*)
     }
 
     PROVIDE(etext = .); /* Define the 'etext' symbol to this value */
@@ -70,9 +70,7 @@ SECTIONS
 }
 ```
 
-我们在链接脚本里把程序的入口点定义为`kern_entry`, 那么我们的程序里需要有一个名称为`kern_entry`的符号。
-
-（这里还没写完）
+我们在链接脚本里把程序的入口点定义为`kern_entry`, 那么我们的程序里需要有一个名称为`kern_entry`的符号。我们在`kern/init/entry.S`编写一段汇编代码, 作为整个内核的入口点。
 
 ```asm
 # kern/init/entry.S
@@ -86,14 +84,16 @@ SECTIONS
     .globl kern_entry # 使得ld能够看到kern_entry这个符号所在的位置, globl和global同义
     # https://sourceware.org/binutils/docs/as/Global.html#Global
 kern_entry: 
-    la sp, bootstacktop
+    la sp, bootstacktop 
+    #将bootstacktop的地址加载到sp(stack pointer)寄存器中, 使用我们分配的内核栈
 
-    tail kern_init
+    tail kern_init 
+    #调用kern_init, 这是我们要用C语言编写的一个函数 
 
 #开始data section
 .section .data
     .align PGSHIFT
-    .global bootstack #启动时的栈
+    .global bootstack #分配内核栈
 bootstack:
     .space KSTACKSIZE #预留栈空间
     .global bootstacktop
