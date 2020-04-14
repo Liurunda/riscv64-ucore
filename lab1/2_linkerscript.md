@@ -88,7 +88,7 @@ kern_entry:
     #将bootstacktop的地址加载到sp(stack pointer)寄存器中, 使用我们分配的内核栈
 
     tail kern_init 
-    #调用kern_init, 这是我们要用C语言编写的一个函数 
+    #调用kern_init, 这是我们要用C语言编写的一个函数, tail是riscv伪指令，作用相当于调用函数（跳转）
 
 #开始data section
 .section .data
@@ -100,5 +100,4 @@ bootstack:
 bootstacktop:                              
 ```
 
-
-
+现在这个入口点，作用就是分配好内核栈，然后跳转到`kern_init`, 看来这个`kern_init`才是我们真正的入口点。下面我们就来看看它。

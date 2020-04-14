@@ -8,3 +8,4 @@
 - [lab1: 断, 都可以断](lab1/intro.md)
   - [内存布局，OpenSBI，elf和bin](lab1/1_layout.md)
   - [链接脚本，入口点](lab1/2_linkerscript.md)
+  - ["真正的"入口点](lab1/3_kern_init.md)
