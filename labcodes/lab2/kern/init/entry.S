@@ -45,6 +45,7 @@ bootstacktop:
 .section .data
     # 由于我们要把这个页表放到一个页里面，因此必须 12 位对齐
     .align PGSHIFT
+    .global boot_page_table_sv39
 # 分配 4KiB 内存给预设的三级页表
 boot_page_table_sv39:
     # 0xffffffff_c0000000 map to 0x80000000 (1G)
