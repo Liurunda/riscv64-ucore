@@ -4,7 +4,7 @@
 OUTPUT_ARCH(riscv)
 ENTRY(kern_entry)
 
-BASE_ADDRESS = 0xFFFFFFFFC0200000;
+BASE_ADDRESS = 0x80200000;
 
 SECTIONS
 {
@@ -12,8 +12,7 @@ SECTIONS
     . = BASE_ADDRESS;
 
     .text : {
-        *(.text.kern_entry)
-        *(.text .stub .text.* .gnu.linkonce.t.*)
+        *(.text.kern_entry .text .stub .text.* .gnu.linkonce.t.*)
     }
 
     PROVIDE(etext = .); /* Define the 'etext' symbol to this value */
