@@ -14,3 +14,4 @@
 - [lab1: 断, 都可以断](lab1/intro.md)
   - [掉进兔子洞(中断入口点)](lab1/1_trapentry.md)
   - [中断处理程序](lab1/2_trap.md)
+  - [滴答滴答(时钟中断)](lab1/3_clock.md)
