@@ -4,7 +4,6 @@
 #include <intr.h>
 #include <kdebug.h>
 #include <kmonitor.h>
-#include <picirq.h>
 #include <pmm.h>
 #include <riscv.h>
 #include <stdio.h>
@@ -28,9 +27,6 @@ int kern_init(void) {
 
     // grade_backtrace();
 
-    pmm_init();  // init physical memory management
-
-    pic_init();  // init interrupt controller
     idt_init();  // init interrupt descriptor table
 
     // rdtime in mbare mode crashes

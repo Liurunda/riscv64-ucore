@@ -95,6 +95,7 @@
     LOAD x31, 31*REGBYTES(sp)
     # restore sp last
     LOAD x2, 2*REGBYTES(sp)
+    #addi sp, sp, 36 * REGBYTES
     .endm
 
     .globl __alltraps
