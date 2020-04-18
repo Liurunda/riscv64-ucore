@@ -18,7 +18,9 @@
 
 > 扩展
 >
-> The RISC-V Instruction Set Manual Volume I: Unprivileged ISA （Document Version 20191213） 1.6
+> The RISC-V Instruction Set Manual Volume I: Unprivileged ISA （Document Version 20191213） 
+>
+> 1.6
 >
 > We use the term **exception** to refer to an unusual condition occurring at run time associated with an instruction in the current RISC-V hart. 
 >
@@ -34,13 +36,23 @@
 
 在中断产生后，应该有个“中断处理程序”来处理中断。CPU怎么知道中断处理程序在哪？难道学习OpenSBI的做法，“中断处理程序必须位于0x80200000"? 实际上，RISCV架构有个CSR叫做`stvec`(Supervisor Trap Vector Base Address Register), 所谓的”中断向量表基址”。中断向量表的作用就是把不同种类的中断映射到对应的中断处理程序。如果只有一个中断处理程序，那么可以让`stvec`直接指向那个中断处理程序的地址。
 
+实际上，对于RISCV架构，`stvec`会把最低位的两个二进制位用来编码一个“模式”，如果是“00”就说明更高的SXLEN-2个二进制位存储的是唯一的中断处理程序的地址(SXLEN是`stval`寄存器的位数)，如果是“01”说明更高的SXLEN-2个二进制位存储的是中断向量表基址。但是怎样用62个二进制位编码一个64位的地址？我们假设这个地址是四字节对齐的，总是在较高的62位后补两个0。
+
+> ​	扩展
+>
+> 在旧版本的RISCV privileged ISA标准中（1.9.1及以前），RISCV不支持中断向量表，用最后两位数编码一个模式是1.10版本加入的。可以思考一下这个改动如何保证了后向兼容。[历史版本的ISA手册](https://github.com/riscv/riscv-isa-manual/releases/tag/archive)
+>
+> 1.9.1版本的RISCV privileged architecture手册：
+>
+> 4.1.3 Supervisor Trap Vector Base Address Register (stvec) The stvec register is an XLEN-bit read/write register that holds the base address of the S-mode trap vector. When an exception occurs, the pc is set to stvec. The stvec register is always aligned to a 4-byte boundary
+
 当我们触发中断进入 S 态进行处理时，以下寄存器会被硬件自动设置，将一些信息提供给中断处理程序：
 
 **sepc**(supervisor exception program counter)，它会记录触发中断的那条指令的地址；
 
 **scause**，它会记录中断发生的原因，还会记录该中断是不是一个外部中断；
 
-**stval**，它会记录一些中断处理所需要的辅助信息，比如指令获取(instruction fetch)、访存、缺页异常，它会把发生问题的目标地址或者出错的指令记录下来，这样我们在中断处理程序中就知道处理目标了。实际上，对于RISCV架构，`stval`会把最低位的两个二进制位用来编码一个“模式”，如果是“00”就说明更高的SXLEN-2个二进制位存储的是唯一的中断处理程序的地址(SXLEN是`stval`寄存器的位数)，如果是“01”说明更高的SXLEN-2个二进制位存储的是中断向量表基址。
+**stval**，它会记录一些中断处理所需要的辅助信息，比如指令获取(instruction fetch)、访存、缺页异常，它会把发生问题的目标地址或者出错的指令记录下来，这样我们在中断处理程序中就知道处理目标了。
 
 > 扩展
 >
