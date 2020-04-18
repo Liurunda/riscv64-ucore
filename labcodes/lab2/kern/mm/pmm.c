@@ -190,12 +190,13 @@ void pmm_init(void) {
     // use pmm->check to verify the correctness of the alloc/free function in a
     // pmm
     check_alloc_page();
-/*
-    // create boot_pgdir, an initial page directory(Page Directory Table, PDT)
-    boot_pgdir = boot_alloc_page();
-    memset(boot_pgdir, 0, PGSIZE);
-    boot_cr3 = PADDR(boot_pgdir);
 
+    // create boot_pgdir, an initial page directory(Page Directory Table, PDT)
+    extern char boot_page_table_sv39[];
+    boot_pgdir = (pte_t*)boot_page_table_sv39;
+    boot_cr3 = PADDR(boot_pgdir);
+    cprintf("boot pgdir: %016lx\nboot cr3: %016lx\n", boot_pgdir, boot_cr3);
+/*
     check_pgdir();
 
     // static_assert(KERNBASE % PTSIZE == 0 && KERNTOP % PTSIZE == 0);
