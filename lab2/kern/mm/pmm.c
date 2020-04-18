@@ -115,9 +115,7 @@ static void page_init(void) {
     extern char end[];
 
     npage = maxpa / PGSIZE;
-    // BBL has put the initial page table at the first available page after the
-    // kernel
-    // so stay away from it by adding extra offset to end
+    //kernel在end[]结束, pages是剩下的页的开始
     pages = (struct Page *)ROUNDUP((void *)end, PGSIZE);
 
     for (size_t i = 0; i < npage - nbase; i++) {
