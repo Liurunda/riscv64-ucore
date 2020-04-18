@@ -233,7 +233,7 @@
 
 static inline void
 lcr3(unsigned int cr3) {
-    write_csr(sptbr, cr3 >> RISCV_PGSHIFT);
+    write_csr(satp, cr3 >> RISCV_PGSHIFT);
 }
 
 #endif
@@ -745,7 +745,7 @@ lcr3(unsigned int cr3) {
 #define CSR_SCAUSE 0x142
 #define CSR_SBADADDR 0x143
 #define CSR_SIP 0x144
-#define CSR_SPTBR 0x180
+#define CSR_SATP 0x180
 #define CSR_MSTATUS 0x300
 #define CSR_MISA 0x301
 #define CSR_MEDELEG 0x302
@@ -1181,7 +1181,7 @@ DECLARE_CSR(sepc, CSR_SEPC)
 DECLARE_CSR(scause, CSR_SCAUSE)
 DECLARE_CSR(sbadaddr, CSR_SBADADDR)
 DECLARE_CSR(sip, CSR_SIP)
-DECLARE_CSR(sptbr, CSR_SPTBR)
+DECLARE_CSR(satp, CSR_SATP)
 DECLARE_CSR(mstatus, CSR_MSTATUS)
 DECLARE_CSR(misa, CSR_MISA)
 DECLARE_CSR(medeleg, CSR_MEDELEG)
