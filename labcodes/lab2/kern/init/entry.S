@@ -22,8 +22,8 @@ kern_entry:
     # 使用 sfence.vma 指令刷新 TLB
     sfence.vma
     # 从此，我们给内核搭建出了一个完美的虚拟内存空间！
-    nop # 可能映射的位置有些bug。。插入一个nop
-
+    #nop # 可能映射的位置有些bug。。插入一个nop
+    
     # 我们在虚拟内存空间中：随意将 sp 设置为虚拟地址！
     lui sp, %hi(bootstacktop)
 
