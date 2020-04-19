@@ -16,4 +16,5 @@
   - [中断处理程序](lab1/2_trap.md)
   - [滴答滴答(时钟中断)](lab1/3_clock.md)
 - [lab2: 物理内存和页表](lab2/intro.md)
+  - [物理内存管理](lab2/1_physical.md)
 - [lab3: 缺页异常和页面置换](lab3/intro.md)
