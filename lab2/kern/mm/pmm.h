@@ -44,7 +44,6 @@ size_t nr_free_pages(void); // number of free pages
 #define free_page(page) free_pages(page, 1)
 
 
-
 /* *
  * PADDR - takes a kernel virtual address (an address that points above
  * KERNBASE),

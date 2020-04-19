@@ -98,10 +98,8 @@ static void page_init(void) {
 
     extern char end[];
 
-    npage = maxpa / PGSIZE;//物理内存总的页数
-    // BBL has put the initial page table at the first available page after the
-    // kernel
-    // so stay away from it by adding extra offset to end
+    npage = maxpa / PGSIZE;
+    //kernel在end[]结束, pages是剩下的页的开始
     pages = (struct Page *)ROUNDUP((void *)end, PGSIZE);
 
     for (size_t i = 0; i < npage - nbase; i++) {
@@ -143,4 +141,3 @@ static void check_alloc_page(void) {
     pmm_manager->check();
     cprintf("check_alloc_page() succeeded!\n");
 }
-
