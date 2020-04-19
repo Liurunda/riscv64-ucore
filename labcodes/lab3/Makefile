@@ -5,12 +5,12 @@ SLASH	:= /
 
 V       := @
 
-ifndef GCCPREFIX
-GCCPREFIX := riscv32-unknown-linux-gnu-
-endif
+#ifndef GCCPREFIX
+GCCPREFIX := riscv64-unknown-elf-
+#endif
 
 ifndef QEMU
-QEMU := qemu-system-riscv32
+QEMU := qemu-system-riscv64
 endif
 
 ifndef SPIKE
@@ -36,7 +36,7 @@ CFLAGS	+= -fno-stack-protector -ffunction-sections -fdata-sections
 CTYPE	:= c S
 
 LD      := $(GCCPREFIX)ld
-LDFLAGS	:= -m elf32lriscv
+LDFLAGS	:= -m elf64lriscv
 LDFLAGS	+= -nostdlib --gc-sections
 
 OBJCOPY := $(GCCPREFIX)objcopy
@@ -128,11 +128,15 @@ $(kernel): $(KOBJS)
 
 $(call create_target,kernel)
 
+# -------------------------------------------------------------------
 # create ucore.img
 UCOREIMG	:= $(call totarget,ucore.img)
 
+# $(UCOREIMG): $(kernel)
+#	cd ../../riscv-pk && rm -rf build && mkdir build && cd build && ../configure --prefix=$(RISCV) --host=riscv64-unknown-elf --with-payload=../../labcodes/$(PROJ)/$(kernel)  --disable-fp-emulation && make && cp bbl ../../labcodes/$(PROJ)/$(UCOREIMG)
+
 $(UCOREIMG): $(kernel)
-	cd ../../riscv-pk && rm -rf build && mkdir build && cd build && ../configure --prefix=$(RISCV) --host=riscv32-unknown-linux-gnu --with-payload=../../labcodes/$(PROJ)/$(kernel) --without-fp-emulation && make && cp bbl ../../labcodes/$(PROJ)/$(UCOREIMG)
+	$(OBJCOPY) $(kernel) --strip-all -O binary $@
 
 $(call create_target,ucore.img)
 
@@ -159,7 +163,12 @@ TARGETS: $(TARGETS)
 
 .PHONY: qemu spike
 qemu: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
-	$(V)$(QEMU) -kernel $(UCOREIMG) -nographic
+#	$(V)$(QEMU) -kernel $(UCOREIMG) -nographic
+	$(V)$(QEMU) \
+		-machine virt \
+		-nographic \
+		-bios default \
+		-device loader,file=$(UCOREIMG),addr=0x80200000
 
 spike: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
 	$(V)$(SPIKE) $(UCOREIMG)

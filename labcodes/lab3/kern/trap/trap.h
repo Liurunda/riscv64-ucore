@@ -52,4 +52,8 @@ void print_trapframe(struct trapframe *tf);
 void print_regs(struct pushregs* gpr);
 bool trap_in_kernel(struct trapframe *tf);
 
+#define CAUSE_LOAD_PAGE_FAULT   0xf
+#define CAUSE_STORE_PAGE_FAULT  0xd
+#define CAUSE_FETCH_PAGE_FAULT  0xc
+
 #endif /* !__KERN_TRAP_TRAP_H__ */

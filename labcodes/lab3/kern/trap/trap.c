@@ -179,7 +179,7 @@ void exception_handler(struct trapframe *tf) {
         case CAUSE_MISALIGNED_FETCH:
             cprintf("Instruction address misaligned\n");
             break;
-        case CAUSE_FAULT_FETCH:
+        case CAUSE_FETCH_PAGE_FAULT:
             cprintf("Instruction access fault\n");
             break;
         case CAUSE_ILLEGAL_INSTRUCTION:
@@ -191,7 +191,7 @@ void exception_handler(struct trapframe *tf) {
         case CAUSE_MISALIGNED_LOAD:
             cprintf("Load address misaligned\n");
             break;
-        case CAUSE_FAULT_LOAD:
+        case CAUSE_LOAD_PAGE_FAULT:
             cprintf("Load access fault\n");
             if ((ret = pgfault_handler(tf)) != 0) {
                 print_trapframe(tf);
@@ -201,7 +201,7 @@ void exception_handler(struct trapframe *tf) {
         case CAUSE_MISALIGNED_STORE:
             cprintf("Store/AMO address misaligned\n");
             break;
-        case CAUSE_FAULT_STORE:
+        case CAUSE_STORE_PAGE_FAULT:
             cprintf("Store/AMO access fault\n");
             if ((ret = pgfault_handler(tf)) != 0) {
                 print_trapframe(tf);

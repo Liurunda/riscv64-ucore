@@ -17,7 +17,7 @@ struct Page *pages;
 // amount of physical memory (in pages)
 size_t npage = 0;
 // The kernel image is mapped at VA=KERNBASE and PA=info.base
-uint32_t va_pa_offset;
+uint64_t va_pa_offset;
 // memory starts at 0x80000000 in RISC-V
 const size_t nbase = DRAM_BASE / PGSIZE;
 
@@ -70,6 +70,7 @@ struct Page *alloc_pages(size_t n) {
         local_intr_save(intr_flag);
         { page = pmm_manager->alloc_pages(n); }
         local_intr_restore(intr_flag);
+        cprintf("alloc page: %016lx\n", page);
 
         if (page != NULL || n > 1 || swap_init_ok == 0) break;
 
@@ -102,17 +103,11 @@ size_t nr_free_pages(void) {
 
 /* pmm_init - initialize the physical memory management */
 static void page_init(void) {
-    memory_block_info info;
-    uint32_t hart_id = sbi_hart_id();
-    if (sbi_query_memory(hart_id, &info) != 0) {
-        panic("failed to get physical memory size info!\n");
-    }
+    va_pa_offset = PHYSICAL_MEMORY_OFFSET;
 
-    va_pa_offset = KERNBASE - info.base;
-
-    uint32_t mem_begin = info.base;
-    uint32_t mem_size = info.size;
-    uint32_t mem_end = mem_begin + mem_size;
+    uint64_t mem_begin = KERNEL_BEGIN_PADDR;
+    uint64_t mem_size = PHYSICAL_MEMORY_END - KERNEL_BEGIN_PADDR;
+    uint64_t mem_end = PHYSICAL_MEMORY_END;
 
     cprintf("physcial memory map:\n");
     cprintf("  memory: 0x%08lx, [0x%08lx, 0x%08lx].\n", mem_size, mem_begin,
@@ -138,8 +133,10 @@ static void page_init(void) {
 
     uintptr_t freemem = PADDR((uintptr_t)pages + sizeof(struct Page) * (npage - nbase));
 
+    cprintf("freemem va: %016lx\nfreemem pa: %016lx\n", (uintptr_t)pages + sizeof(struct Page) * (npage - nbase), freemem);
     mem_begin = ROUNDUP(freemem, PGSIZE);
     mem_end = ROUNDDOWN(mem_end, PGSIZE);
+    cprintf("mem_begin: %016lx\nmem_end: %016lx\n", mem_begin, mem_end);
     if (freemem < mem_end) {
         init_memmap(pa2page(mem_begin), (mem_end - mem_begin) / PGSIZE);
     }
@@ -206,10 +203,11 @@ void pmm_init(void) {
     check_alloc_page();
 
     // create boot_pgdir, an initial page directory(Page Directory Table, PDT)
-    boot_pgdir = boot_alloc_page();
-    memset(boot_pgdir, 0, PGSIZE);
+    extern char boot_page_table_sv39[];
+    boot_pgdir = (pte_t*)boot_page_table_sv39;
     boot_cr3 = PADDR(boot_pgdir);
-
+    cprintf("boot pgdir: %016lx\nboot cr3: %016lx\n", boot_pgdir, boot_cr3);
+/*
     check_pgdir();
 
     static_assert(KERNBASE % PTSIZE == 0 && KERNTOP % PTSIZE == 0);
@@ -244,6 +242,7 @@ void pmm_init(void) {
     check_boot_pgdir();
 
     print_pgdir();
+*/
 }
 
 // get_pte - get pte and return the kernel virtual address of this pte for la
