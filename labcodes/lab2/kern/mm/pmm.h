@@ -45,7 +45,7 @@ size_t nr_free_pages(void);
 #define alloc_page() alloc_pages(1)
 #define free_page(page) free_pages(page, 1)
 
-pte_t *get_pte(pde_t *pgdir, uintptr_t la, bool create);
+pte_t *get_pte(pde_t *pgdir, uintptr_t la, bool create, int pt_level);
 struct Page *get_page(pde_t *pgdir, uintptr_t la, pte_t **ptep_store);
 void page_remove(pde_t *pgdir, uintptr_t la);
 int page_insert(pde_t *pgdir, struct Page *page, uintptr_t la, uint32_t perm);

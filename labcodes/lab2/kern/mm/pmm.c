@@ -151,7 +151,7 @@ static void boot_map_segment(pde_t *pgdir, uintptr_t la, size_t size,
     la = ROUNDDOWN(la, PGSIZE);
     pa = ROUNDDOWN(pa, PGSIZE);
     for (; n > 0; n--, la += PGSIZE, pa += PGSIZE) {
-        pte_t *ptep = get_pte(pgdir, la, 1);
+        pte_t *ptep = get_pte(pgdir, la, 1, SV39_PT2);
         assert(ptep != NULL);
         *ptep = pte_create(pa >> PGSHIFT, PTE_V | perm);
     }
@@ -203,21 +203,21 @@ void pmm_init(void) {
 
     // recursively insert boot_pgdir in itself
     // to form a virtual page table at virtual address VPT
-    boot_pgdir[PDX(VPT)] = pte_create(PPN(boot_cr3), PAGE_TABLE_DIR);
-    boot_pgdir[PDX(VPT) + 1] = pte_create(PPN(boot_cr3), READ_WRITE);
+    // boot_pgdir[PDX(VPT)] = pte_create(PPN(boot_cr3), PAGE_TABLE_DIR);
+    // boot_pgdir[PDX(VPT) + 1] = pte_create(PPN(boot_cr3), READ_WRITE);
 
     // map all physical memory to linear memory with base linear addr KERNBASE
     // linear_addr KERNBASE~KERNBASE+KMEMSIZE = phy_addr 0~KMEMSIZE
     // But shouldn't use this map until enable_paging() & gdt_init() finished.
     // boot_map_segment(boot_pgdir, KERNBASE, KMEMSIZE, 0, PTE_W);
-    boot_map_segment(boot_pgdir, KERNBASE, KMEMSIZE, PADDR(KERNBASE),
-                     READ_WRITE_EXEC);
+    // boot_map_segment(boot_pgdir, KERNBASE, KMEMSIZE, PADDR(KERNBASE),
+    //                 READ_WRITE_EXEC);
 
-    enable_paging();
+    // enable_paging();
 
     // now the basic virtual memory map(see memalyout.h) is established.
     // check the correctness of the basic virtual memory map.
-    check_boot_pgdir();
+    // check_boot_pgdir();
 
     print_pgdir();
 */
@@ -230,7 +230,7 @@ void pmm_init(void) {
 //  la:     the linear address need to map
 //  create: a logical value to decide if alloc a page for PT
 // return vaule: the kernel virtual address of this pte
-pte_t *get_pte(pde_t *pgdir, uintptr_t la, bool create) {
+pte_t *get_pte(pde_t *pgdir, uintptr_t la, bool create, int pt_level) {
     /* LAB2 EXERCISE 2: YOUR CODE
      *
      * If you need to visit a physical address, please use KADDR()
@@ -258,8 +258,10 @@ pte_t *get_pte(pde_t *pgdir, uintptr_t la, bool create) {
      *   PTE_U           0x004                   // page table/directory entry
      * flags bit : User can access
      */
-    pde_t *pdep = &pgdir[PDX(la)];
-    if (!(*pdep & PTE_V)) {
+
+    cprintf("pgdir: %016lx\nla: %016lx\npt level: %d\n", pgdir, la, pt_level);
+    pde_t *pdep = &pgdir[SV39_VPN(la, pt_level)];
+    if (!(*pdep & PTE_V)) {         // invalid
         struct Page *page;
         if (!create || (page = alloc_page()) == NULL) {
             return NULL;
@@ -271,12 +273,16 @@ pte_t *get_pte(pde_t *pgdir, uintptr_t la, bool create) {
         *pdep = pte_create(page2ppn(page), PTE_U | PTE_V);
         // *pdep = ptd_create(page2ppn(page));
     }
-    return &((pte_t *)KADDR(PDE_ADDR(*pdep)))[PTX(la)];
+    if (pt_level == SV39_PT2) {
+        return get_pte((pte_t *)KADDR(PDE_ADDR(*pdep)), la, create, SV39_PT1);
+    } else {
+        return &((pte_t *)KADDR(PDE_ADDR(*pdep)))[SV39_VPN(la, SV39_PT0)];
+    }
 }
 
 // get_page - get related Page struct for linear address la using PDT pgdir
 struct Page *get_page(pde_t *pgdir, uintptr_t la, pte_t **ptep_store) {
-    pte_t *ptep = get_pte(pgdir, la, 0);
+    pte_t *ptep = get_pte(pgdir, la, 0, SV39_PT2);
     if (ptep_store != NULL) {
         *ptep_store = ptep;
     }
@@ -328,7 +334,7 @@ static inline void page_remove_pte(pde_t *pgdir, uintptr_t la, pte_t *ptep) {
 // page_remove - free an Page which is related linear address la and has an
 // validated pte
 void page_remove(pde_t *pgdir, uintptr_t la) {
-    pte_t *ptep = get_pte(pgdir, la, 0);
+    pte_t *ptep = get_pte(pgdir, la, 0, SV39_PT2);
     if (ptep != NULL) {
         page_remove_pte(pgdir, la, ptep);
     }
@@ -343,7 +349,7 @@ void page_remove(pde_t *pgdir, uintptr_t la) {
 // return value: always 0
 // note: PT is changed, so the TLB need to be invalidate
 int page_insert(pde_t *pgdir, struct Page *page, uintptr_t la, uint32_t perm) {
-    pte_t *ptep = get_pte(pgdir, la, 1);
+    pte_t *ptep = get_pte(pgdir, la, 1, SV39_PT2);
     if (ptep == NULL) {
         return -E_NO_MEM;
     }
@@ -356,6 +362,7 @@ int page_insert(pde_t *pgdir, struct Page *page, uintptr_t la, uint32_t perm) {
             page_remove_pte(pgdir, la, ptep);
         }
     }
+    // cprintf("good here\n");
     *ptep = pte_create(page2ppn(page), PTE_V | perm);
     tlb_invalidate(pgdir, la);
     return 0;
@@ -364,7 +371,7 @@ int page_insert(pde_t *pgdir, struct Page *page, uintptr_t la, uint32_t perm) {
 // invalidate a TLB entry, but only if the page tables being
 // edited are the ones currently in use by the processor.
 void tlb_invalidate(pde_t *pgdir, uintptr_t la) {
-    asm volatile("sfence.vm %0" : : "r"(la));
+    asm volatile("sfence.vma":::);
 }
 
 static void check_alloc_page(void) {
@@ -382,19 +389,21 @@ static void check_pgdir(void) {
 
     struct Page *p1, *p2;
     p1 = alloc_page();
+    cprintf("p1: %016lx pa: %016lx\n", p1, page2pa(p1));
     assert(page_insert(boot_pgdir, p1, 0x0, 0) == 0);
 
+    cprintf("111\n");
     pte_t *ptep;
-    assert((ptep = get_pte(boot_pgdir, 0x0, 0)) != NULL);
+    assert((ptep = get_pte(boot_pgdir, 0x0, 0, SV39_PT2)) != NULL);
     assert(pte2page(*ptep) == p1);
     assert(page_ref(p1) == 1);
 
-    ptep = &((pte_t *)KADDR(PDE_ADDR(boot_pgdir[0])))[1];
-    assert(get_pte(boot_pgdir, PGSIZE, 0) == ptep);
+    //ptep = &((pte_t *)KADDR(PDE_ADDR(boot_pgdir[0])))[1];
+    //assert(get_pte(boot_pgdir, PGSIZE, 0, SV39_PT2) == ptep);
 
     p2 = alloc_page();
     assert(page_insert(boot_pgdir, p2, PGSIZE, PTE_U | PTE_W) == 0);
-    assert((ptep = get_pte(boot_pgdir, PGSIZE, 0)) != NULL);
+    assert((ptep = get_pte(boot_pgdir, PGSIZE, 0, SV39_PT2)) != NULL);
     assert(*ptep & PTE_U);
     assert(*ptep & PTE_W);
     assert(boot_pgdir[0] & PTE_U);
@@ -403,7 +412,7 @@ static void check_pgdir(void) {
     assert(page_insert(boot_pgdir, p1, PGSIZE, 0) == 0);
     assert(page_ref(p1) == 2);
     assert(page_ref(p2) == 0);
-    assert((ptep = get_pte(boot_pgdir, PGSIZE, 0)) != NULL);
+    assert((ptep = get_pte(boot_pgdir, PGSIZE, 0, SV39_PT2)) != NULL);
     assert(pte2page(*ptep) == p1);
     assert((*ptep & PTE_U) == 0);
 
@@ -427,10 +436,10 @@ static void check_boot_pgdir(void) {
     uint64_t i;
     // This is the correct way I suppose
     for (i = KERNBASE / PGSIZE; i < npage; i++) {
-        assert((ptep = get_pte(boot_pgdir, (uintptr_t)KADDR(i), 0)) != NULL);
+        assert((ptep = get_pte(boot_pgdir, (uintptr_t)KADDR(i), 0, SV39_PT2)) != NULL);
         assert(PTE_ADDR(*ptep) == i);
     }
-    assert(PDE_ADDR(boot_pgdir[PDX(VPT)]) == PADDR(boot_pgdir));
+    //assert(PDE_ADDR(boot_pgdir[PDX(VPT)]) == PADDR(boot_pgdir));
 
     assert(boot_pgdir[0] == 0);
     struct Page *p;
@@ -439,7 +448,7 @@ static void check_boot_pgdir(void) {
     assert(page_ref(p) == 1);
     assert(page_insert(boot_pgdir, p, 0x100 + PGSIZE, PTE_W | PTE_R) == 0);
     assert(page_ref(p) == 2);
-    pte_t *pte = get_pte(boot_pgdir, 0x100, 0);
+    pte_t *pte = get_pte(boot_pgdir, 0x100, 0, SV39_PT2);
 
     const char *str = "ucore: Hello world!!";
     strcpy((void *)0x100, str);
