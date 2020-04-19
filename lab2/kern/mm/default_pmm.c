@@ -293,7 +293,7 @@ default_check(void) {
     assert(count == 0);
     assert(total == 0);
 }
-
+//这个结构体在
 const struct pmm_manager default_pmm_manager = {
     .name = "default_pmm_manager",
     .init = default_init,
