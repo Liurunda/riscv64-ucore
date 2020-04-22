@@ -89,7 +89,7 @@ void print_pgdir(void);
 extern struct Page *pages;
 extern size_t npage;
 extern const size_t nbase;
-extern uint64_t va_pa_offset;
+extern uint_t va_pa_offset;
 
 static inline ppn_t page2ppn(struct Page *page) { return page - pages + nbase; }
 

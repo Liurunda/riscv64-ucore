@@ -31,14 +31,9 @@
  * */
 
 /* All physical memory mapped at this address */
-#define KERNBASE            0xFFFFFFFFC0200000
-#define KMEMSIZE            0x7E00000                  // the maximum amount of physical memory
+#define KERNBASE            0x80200000
+#define KMEMSIZE            0x38000000                  // the maximum amount of physical memory
 #define KERNTOP             (KERNBASE + KMEMSIZE)
-
-#define PHYSICAL_MEMORY_END         0x88000000
-#define PHYSICAL_MEMORY_OFFSET      0xFFFFFFFF40000000
-#define KERNEL_BEGIN_PADDR          0x80200000
-#define KERNEL_BEGIN_VADDR          0xFFFFFFFFC0200000
 
 /* *
  * Virtual page table. Entry PDX[VPT] in the PD (Page Directory) contains
@@ -68,7 +63,7 @@ typedef pte_t swap_entry_t; //the pte can also be a swap entry
  * */
 struct Page {
     int ref;                        // page frame's reference counter
-    uint64_t flags;                 // array of flags that describe the status of the page frame
+    uint_t flags;                 // array of flags that describe the status of the page frame
     unsigned int property;          // the num of free block, used in first fit pm manager
     list_entry_t page_link;         // free list link
     list_entry_t pra_page_link;     // used for pra (page replace algorithm)
