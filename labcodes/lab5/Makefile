@@ -179,8 +179,11 @@ $(call create_target,kernel)
 # create ucore.img
 UCOREIMG	:= $(call totarget,ucore.img)
 
+# $(UCOREIMG): $(kernel)
+#	cd ../../riscv-pk && rm -rf build && mkdir build && cd build && ../configure --prefix=$(RISCV) --host=riscv64-unknown-elf --with-payload=../../labcodes/$(PROJ)/$(kernel)  --disable-fp-emulation && make && cp bbl ../../labcodes/$(PROJ)/$(UCOREIMG)
+
 $(UCOREIMG): $(kernel)
-	cd ../../riscv-pk && rm -rf build && mkdir build && cd build && ../configure --prefix=$(RISCV) --host=riscv64-unknown-elf --with-payload=../../labcodes_answer/$(PROJ)/$(kernel) --disable-fp-emulation --enable-logo && make && cp bbl ../../labcodes_answer/$(PROJ)/$(UCOREIMG)
+	$(OBJCOPY) $(kernel) --strip-all -O binary $@
 
 $(call create_target,ucore.img)
 
@@ -210,8 +213,13 @@ TARGETS: $(TARGETS)
 QEMUOPTS = -hda $(UCOREIMG) -drive file=$(SWAPIMG),media=disk,cache=writeback
 
 .PHONY: qemu spike
-qemu: $(UCOREIMG)
-	$(V)$(QEMU) -machine virt -kernel $(UCOREIMG) -nographic
+qemu: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
+#	$(V)$(QEMU) -kernel $(UCOREIMG) -nographic
+	$(V)$(QEMU) \
+		-machine virt \
+		-nographic \
+		-bios default \
+		-device loader,file=$(UCOREIMG),addr=0x80200000
 
 spike: $(UCOREIMG)
 	$(V)$(SPIKE) $(UCOREIMG)
@@ -248,9 +256,9 @@ touch:
 print-%:
 	@echo $($(shell echo $(patsubst print-%,%,$@) | $(TR) [a-z] [A-Z]))
 
-.PHONY: clean dist-clean handin packall
+.PHONY: clean dist-clean handin packall tags
 clean:
-	$(V)$(RM) $(GRADE_GDB_IN) $(GRADE_QEMU_OUT)
+	$(V)$(RM) $(GRADE_GDB_IN) $(GRADE_QEMU_OUT) cscope* tags
 	-$(RM) -r $(OBJDIR) $(BINDIR)
 
 dist-clean: clean
@@ -263,3 +271,9 @@ packall: clean
 	@$(RM) -f $(HANDIN)
 	@tar -czf $(HANDIN) `find . -type f -o -type d | grep -v '^\.*$$' | grep -vF '$(HANDIN)'`
 
+tags:
+	@echo TAGS ALL
+	$(V)rm -f cscope.files cscope.in.out cscope.out cscope.po.out tags
+	$(V)find . -type f -name "*.[chS]" >cscope.files
+	$(V)cscope -bq 
+	$(V)ctags -L cscope.files
