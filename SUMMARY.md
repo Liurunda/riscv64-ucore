@@ -20,3 +20,5 @@
   - [物理内存管理](lab2/2_physical.md)
   - [页面分配算法](lab2/3_alloc.md)
 - [lab3: 缺页异常和页面置换](lab3/intro.md)
+  - [扫清外围](1_pagefault.md)
+  - [使用多级页表](lab3/2_pagetable.md)
