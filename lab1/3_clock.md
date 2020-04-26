@@ -1,6 +1,6 @@
 # lab1 3/n 滴答滴答（时钟中断）
 
-时钟中断，也需要CPU硬件的支持。CPU以"时钟周期"为工作的基本时间单位，对逻辑门的时序电路进行同步。
+时钟中断需要CPU硬件的支持。CPU以"时钟周期"为工作的基本时间单位，对逻辑门的时序电路进行同步。
 
 我们的“时钟中断”实际上就是”每隔若干个时钟周期执行一次的程序“。
 
@@ -110,6 +110,6 @@ void interrupt_handler(struct trapframe *tf) {
 }
 ```
 
-现在`make qemu`, 应该能看到打印一行行的`100 ticks`
+现在执行`make qemu`, 应该能看到打印一行行的`100 ticks`
 
 目前为止的代码可以在[这里](https://github.com/Liurunda/riscv64-ucore/tree/lab1/lab1)找到，遇到困难可以参考。

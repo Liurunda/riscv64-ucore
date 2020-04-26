@@ -81,9 +81,9 @@ void trap(struct trapframe *tf) { trap_dispatch(tf); }
 
 ```
 
-我们可以看到，interrupt_handler()和exception_handler()的实现还比较简单，只是简单地根据`scause`的数值更仔细地分了下类，做了一些输出就直接返回了。我们接下来主要关注时钟中断的处理。
+我们可以看到，interrupt_handler()和exception_handler()的实现还比较简单，只是简单地根据`scause`的数值更仔细地分了下类，做了一些输出就直接返回了。switch里的各种case, 如`IRQ_U_SOFT`,`CAUSE_USER_ECALL`,是riscv ISA 标准里规定的。我们在`riscv.h`里定义了这些常量。我们接下来主要关注时钟中断的处理。
 
-switch里的各种case, 如`IRQ_U_SOFT`,`CAUSE_USER_ECALL`,是riscv ISA 标准里规定的。我们在`riscv.h`里定义了这些常量。
+在这里我们对时钟中断进行了一个简单的处理，即每次触发时钟中断的时候，我们会给一个计数器加一，并且设定好下一次时钟中断。当计数器加到100的时候，我们会输出一个`100ticks`表示我们触发了100次时钟中断。通过在模拟器中观察输出我们即刻看到是否正确触发了时钟中断，从而验证我们实现的异常处理机制。
 
 ```c
 void interrupt_handler(struct trapframe *tf) {
@@ -175,3 +175,4 @@ void exception_handler(struct trapframe *tf) {
 
 ![](scause2.jpg)
 
+下一节我们将仔细讨论如何设置好时钟模块。
