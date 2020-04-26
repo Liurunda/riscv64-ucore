@@ -3,7 +3,6 @@
 #include <string.h>
 #include <console.h>
 #include <kdebug.h>
-#include <picirq.h>
 #include <trap.h>
 #include <clock.h>
 #include <intr.h>
@@ -22,8 +21,6 @@ kern_init(void) {
     extern char edata[], end[];
     memset(edata, 0, end - edata);
 
-    cons_init();                // init the console
-
     const char *message = "(THU.CST) os is loading ...";
     cprintf("%s\n\n", message);
 
@@ -33,7 +30,6 @@ kern_init(void) {
 
     pmm_init();                 // init physical memory management
 
-    pic_init();                 // init interrupt controller
     idt_init();                 // init interrupt descriptor table
 
     vmm_init();                 // init virtual memory management
