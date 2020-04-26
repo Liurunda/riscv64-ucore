@@ -53,7 +53,6 @@ int page_insert(pde_t *pgdir, struct Page *page, uintptr_t la, uint32_t perm);
 void tlb_invalidate(pde_t *pgdir, uintptr_t la);
 struct Page *pgdir_alloc_page(pde_t *pgdir, uintptr_t la, uint32_t perm);
 
-void print_pgdir(void);
 
 /* *
  * PADDR - takes a kernel virtual address (an address that points above
