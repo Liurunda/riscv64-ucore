@@ -91,16 +91,14 @@ size_t nr_free_pages(void) {
 static void page_init(void) {
     extern char kern_entry[];
 
-    va_pa_offset = KERNBASE - (uint_t)kern_entry;
-
-    uint_t mem_begin = (uint_t)kern_entry;
-    uint_t mem_end = (8 << 20) + DRAM_BASE; // 8MB memory on qemu
-    uint_t mem_size = mem_end - mem_begin;
-
+    va_pa_offset = KERNBASE - 0x80200000;
+    uint64_t mem_begin = KERNEL_BEGIN_PADDR;
+    uint64_t mem_size = PHYSICAL_MEMORY_END - KERNEL_BEGIN_PADDR;
+    uint64_t mem_end = PHYSICAL_MEMORY_END; //硬编码取代 sbi_query_memory()接口
+    cprintf("membegin %llx memend %llx mem_size %llx\n",mem_begin, mem_end, mem_size);
     cprintf("physcial memory map:\n");
     cprintf("  memory: 0x%08lx, [0x%08lx, 0x%08lx].\n", mem_size, mem_begin,
             mem_end - 1);
-
     uint64_t maxpa = mem_end;
 
     if (maxpa > KERNTOP) {
@@ -119,7 +117,6 @@ static void page_init(void) {
     }
 
     uintptr_t freemem = PADDR((uintptr_t)pages + sizeof(struct Page) * (npage - nbase));
-
     mem_begin = ROUNDUP(freemem, PGSIZE);
     mem_end = ROUNDDOWN(mem_end, PGSIZE);
     if (freemem < mem_end) {
@@ -186,28 +183,25 @@ void pmm_init(void) {
     // use pmm->check to verify the correctness of the alloc/free function in a
     // pmm
     check_alloc_page();
-
     // create boot_pgdir, an initial page directory(Page Directory Table, PDT)
-    boot_pgdir = boot_alloc_page();
-    memset(boot_pgdir, 0, PGSIZE);
+    extern char boot_page_table_sv39[];
+    boot_pgdir = (pte_t*)boot_page_table_sv39;
     boot_cr3 = PADDR(boot_pgdir);
-
     check_pgdir();
-
     static_assert(KERNBASE % PTSIZE == 0 && KERNTOP % PTSIZE == 0);
 
     // map all physical memory to linear memory with base linear addr KERNBASE
     // linear_addr KERNBASE~KERNBASE+KMEMSIZE = phy_addr 0~KMEMSIZE
     // But shouldn't use this map until enable_paging() & gdt_init() finished.
-    boot_map_segment(boot_pgdir, KERNBASE, KMEMSIZE, PADDR(KERNBASE),
-                     READ_WRITE_EXEC);
+    //boot_map_segment(boot_pgdir, KERNBASE, KMEMSIZE, PADDR(KERNBASE),
+     //                READ_WRITE_EXEC);
 
     // temporary map:
     // virtual_addr 3G~3G+4M = linear_addr 0~4M = linear_addr 3G~3G+4M =
     // phy_addr 0~4M
     // boot_pgdir[0] = boot_pgdir[PDX(KERNBASE)];
 
-    enable_paging();
+    //    enable_paging();
 
     // now the basic virtual memory map(see memalyout.h) is established.
     // check the correctness of the basic virtual memory map.
@@ -262,6 +256,7 @@ pte_t *get_pte(pde_t *pgdir, uintptr_t la, bool create) {
         *pdep1 = pte_create(page2ppn(page), PTE_U | PTE_V);
     }
     pde_t *pdep0 = &((pde_t *)KADDR(PDE_ADDR(*pdep1)))[PDX0(la)];
+//    pde_t *pdep0 = &((pde_t *)(PDE_ADDR(*pdep1)))[PDX0(la)];
     if (!(*pdep0 & PTE_V)) {
     	struct Page *page;
     	if (!create || (page = alloc_page()) == NULL) {
@@ -270,6 +265,7 @@ pte_t *get_pte(pde_t *pgdir, uintptr_t la, bool create) {
     	set_page_ref(page, 1);
     	uintptr_t pa = page2pa(page);
     	memset(KADDR(pa), 0, PGSIZE);
+ //   	memset(pa, 0, PGSIZE);
     	*pdep0 = pte_create(page2ppn(page), PTE_U | PTE_V);
     }
     return &((pte_t *)KADDR(PDE_ADDR(*pdep0)))[PTX(la)];
@@ -406,7 +402,6 @@ static void check_pgdir(void) {
     struct Page *p1, *p2;
     p1 = alloc_page();
     assert(page_insert(boot_pgdir, p1, 0x0, 0) == 0);
-
     pte_t *ptep;
     assert((ptep = get_pte(boot_pgdir, 0x0, 0)) != NULL);
     assert(pte2page(*ptep) == p1);

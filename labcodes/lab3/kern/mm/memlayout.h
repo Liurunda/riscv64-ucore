@@ -31,9 +31,18 @@
  * */
 
 /* All physical memory mapped at this address */
-#define KERNBASE            0x80200000
-#define KMEMSIZE            0x38000000                  // the maximum amount of physical memory
-#define KERNTOP             (KERNBASE + KMEMSIZE)
+#define KERNBASE            0xFFFFFFFFC0200000 // = 0x80200000(物理内存里内核的起始位置, KERN_BEGIN_PADDR) + 0xFFFFFFFF40000000(偏移量, PHYSICAL_MEMORY_OFFSET)
+//把原有内存映射到虚拟内存空间的最后一页
+#define KMEMSIZE            0x7E00000          // the maximum amount of physical memory
+// 0x7E00000 = 0x8000000 - 0x200000
+// QEMU 缺省的RAM为 0x80000000到0x88000000, 128MiB, 0x80000000到0x80200000被OpenSBI占用
+#define KERNTOP             (KERNBASE + KMEMSIZE) // 0x88000000对应的虚拟地址
+
+#define PHYSICAL_MEMORY_END         0x88000000
+#define PHYSICAL_MEMORY_OFFSET      0xFFFFFFFF40000000
+#define KERNEL_BEGIN_PADDR          0x80200000
+#define KERNEL_BEGIN_VADDR          0xFFFFFFFFC0200000
+
 
 #define KSTACKPAGE          2                           // # of pages in kernel stack
 #define KSTACKSIZE          (KSTACKPAGE * PGSIZE)       // sizeof kernel stack
