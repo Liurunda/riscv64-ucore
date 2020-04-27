@@ -70,6 +70,18 @@ SECTIONS
 }
 ```
 
+> 趣闻 
+>
+> 为什么把初始化为0（或者说，无需初始化）的数据段称作bss?
+>
+> CSAPP 7.4 Relocatable Object files
+>
+> Aside Why is uninitialized data called .bss?
+> The use of the term .bss to denote uninitialized data is universal. It was originally an acronym for the
+> “block started by symbol” directive from the IBM 704 assembly language (circa 1957) and the acronym
+> has stuck. A simple way to remember the difference between the .data and .bss sections is to think
+> of “bss” as an abbreviation for “Better Save Space!”
+
 我们在链接脚本里把程序的入口点定义为`kern_entry`, 那么我们的程序里需要有一个名称为`kern_entry`的符号。我们在`kern/init/entry.S`编写一段汇编代码, 作为整个内核的入口点。
 
 ```asm
