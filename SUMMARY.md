@@ -22,3 +22,5 @@
 - [lab3: 缺页异常和页面置换](lab3/intro.md)
   - [扫清外围](lab3/1_pagefault.md)
   - [使用多级页表](lab3/2_pagetable.md)
+  - [页面置换机制](lab3/3_swap.md)
+  - [FIFO置换算法](lab3/4_fifo.md)
