@@ -24,3 +24,5 @@
   - [使用多级页表](lab3/2_pagetable.md)
   - [页面置换机制](lab3/3_swap.md)
   - [FIFO置换算法](lab3/4_fifo.md)
+- [lab4: 进程管理](lab4/intro.md)
+  - [进程与线程](lab4/1_process.md)
