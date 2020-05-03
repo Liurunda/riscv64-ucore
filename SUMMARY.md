@@ -26,3 +26,4 @@
   - [FIFO置换算法](lab3/4_fifo.md)
 - [lab4: 进程管理](lab4/intro.md)
   - [进程与线程](lab4/1_process.md)
+  - [相关数据结构](lab4/2_struct.md)
