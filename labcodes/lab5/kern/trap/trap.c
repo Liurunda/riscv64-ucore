@@ -176,6 +176,7 @@ void interrupt_handler(struct trapframe *tf) {
 }
 
 void exception_handler(struct trapframe *tf) {
+    cputs("some exception");
     int ret;
     switch (tf->cause) {
         case CAUSE_MISALIGNED_FETCH:
@@ -189,6 +190,11 @@ void exception_handler(struct trapframe *tf) {
             break;
         case CAUSE_BREAKPOINT:
             cprintf("Breakpoint\n");
+            if(tf->gpr.a7 == 10){
+                cputs("f**k!");
+            }
+            tf->epc += 4;
+            syscall(); 
             break;
         case CAUSE_MISALIGNED_LOAD:
             cprintf("Load address misaligned\n");
@@ -267,7 +273,8 @@ static inline void trap_dispatch(struct trapframe* tf) {
 void
 trap(struct trapframe *tf) {
     // dispatch based on what type of trap occurred
-	if (current == NULL) {
+    cputs("some trap");
+    if (current == NULL) {
         trap_dispatch(tf);
     } else {
         struct trapframe *otf = current->tf;

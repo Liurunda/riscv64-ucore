@@ -669,8 +669,10 @@ bad_mm:
 //           - call load_icode to setup new memory space accroding binary prog.
 int
 do_execve(const char *name, size_t len, unsigned char *binary, size_t size) {
+    cputs("do execve!");
     struct mm_struct *mm = current->mm;
     if (!user_mem_check(mm, (uintptr_t)name, len, 0)) {
+        cputs("failure point A");
         return -E_INVAL;
     }
     if (len > PROC_NAME_LEN) {
@@ -792,35 +794,22 @@ do_kill(int pid) {
 // kernel_execve - do SYS_exec syscall to exec a user program called by user_main kernel_thread
 static int
 kernel_execve(const char *name, unsigned char *binary, size_t size) {
-    int64_t ret, len = strlen(name);
-    // asm volatile (
-    //     "int %1;"
-    //     : "=a" (ret)
-    //     : "i" (T_SYSCALL), "0" (SYS_exec), "d" (name), "c" (len), "b" (binary), "D" (size)
-    //     : "memory");
+    cprintf("here kernel execve %s||| %s  ||| %lld\n", name, binary, size);
+    int64_t ret=0, len = strlen(name);
+    cprintf("%s %llu %llu %llu", name, len, binary, size);
     asm volatile(
         "li a0, %1\n"
-        "ld a1, %2\n"
-        "ld a2, %3\n"
-        "ld a3, %4\n"
-        "ld a4, %5\n"
-    	"li a7, 20\n"
-        "ecall\n"
-        "sd a0, %0"
+        "lw a1, %2\n"
+        "lw a2, %3\n"
+        "lw a3, %4\n"
+        "lw a4, %5\n"
+    	"li a7, 10\n"
+        "ebreak\n"
+        "sw a0, %0\n"
         : "=m"(ret)
         : "i"(SYS_exec), "m"(name), "m"(len), "m"(binary), "m"(size)
         : "memory");
-    // do_execve(name, len, binary, size);
-    // asm volatile("sret");
-    // uintptr_t sstatus = read_csr(sstatus);
-    // sstatus = INSERT_FIELD(sstatus, SSTATUS_SPP, PRV_U);
-    // sstatus = INSERT_FIELD(sstatus, SSTATUS_SPIE, 0);
-    // write_csr(sstatus, sstatus);
-    // write_csr(mscratch, MACHINE_STACK_TOP() - MENTRY_FRAME_SIZE);
-    // write_csr(mepc, fn);
-    // write_csr(sptbr, (uintptr_t)root_page_table >> RISCV_PGSHIFT);
-    // asm volatile("mv a0, %0; mv sp, %0; mret" : : "r"(stack));
-    // __builtin_unreachable();
+    cprintf("ret = %d\n", ret);
     return ret;
 }
 
@@ -850,7 +839,7 @@ user_main(void *arg) {
 #ifdef TEST
     KERNEL_EXECVE2(TEST, TESTSTART, TESTSIZE);
 #else
-    KERNEL_EXECVE(exit);
+    KERNEL_EXECVE(hello);
 #endif
     panic("user_main execve failed.\n");
 }

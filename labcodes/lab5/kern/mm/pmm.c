@@ -146,6 +146,7 @@ static void page_init(void) {
     if (freemem < mem_end) {
         init_memmap(pa2page(mem_begin), (mem_end - mem_begin) / PGSIZE);
     }
+    cprintf("vapaofset is %llu\n",va_pa_offset);
 }
 
 static void enable_paging(void) {
