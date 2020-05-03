@@ -83,7 +83,6 @@ syscall(void) {
     struct trapframe *tf = current->tf;
     uint64_t arg[5];
     int num = tf->gpr.a0;
-    cprintf("%llu %llu %llu %llu %llu\n", tf->gpr.a0, tf->gpr.a1, tf->gpr.a2, tf->gpr.a3, tf->gpr.a4);
     if (num >= 0 && num < NUM_SYSCALLS) {
         if (syscalls[num] != NULL) {
             arg[0] = tf->gpr.a1;

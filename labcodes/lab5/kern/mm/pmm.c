@@ -134,10 +134,6 @@ static void page_init(void) {
     cprintf("vapaofset is %llu\n",va_pa_offset);
 }
 
-static void enable_paging(void) {
-    write_csr(satp, 0x8000000000000000 | (boot_cr3 >> RISCV_PGSHIFT));
-}
-
 // boot_map_segment - setup&enable the paging mechanism
 // parameters
 //  la:   linear address of this memory need to map (after x86 segment map)
@@ -192,8 +188,8 @@ void pmm_init(void) {
     check_alloc_page();
 
     // create boot_pgdir, an initial page directory(Page Directory Table, PDT)
-    boot_pgdir = boot_alloc_page();
-    memset(boot_pgdir, 0, PGSIZE);
+    extern char boot_page_table_sv39[];
+    boot_pgdir = (pte_t*)boot_page_table_sv39;
     boot_cr3 = PADDR(boot_pgdir);
 
     check_pgdir();

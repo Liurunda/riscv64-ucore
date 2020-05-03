@@ -667,10 +667,8 @@ bad_mm:
 //           - call load_icode to setup new memory space accroding binary prog.
 int
 do_execve(const char *name, size_t len, unsigned char *binary, size_t size) {
-    cputs("do execve!");
     struct mm_struct *mm = current->mm;
     if (!user_mem_check(mm, (uintptr_t)name, len, 0)) {
-        cputs("failure point A");
         return -E_INVAL;
     }
     if (len > PROC_NAME_LEN) {
@@ -682,6 +680,7 @@ do_execve(const char *name, size_t len, unsigned char *binary, size_t size) {
     memcpy(local_name, name, len);
 
     if (mm != NULL) {
+        cputs("mm != NULL");
         lcr3(boot_cr3);
         if (mm_count_dec(mm) == 0) {
             exit_mmap(mm);
@@ -792,9 +791,7 @@ do_kill(int pid) {
 // kernel_execve - do SYS_exec syscall to exec a user program called by user_main kernel_thread
 static int
 kernel_execve(const char *name, unsigned char *binary, size_t size) {
-    cprintf("here kernel execve %s||| %s  ||| %lld\n", name, binary, size);
     int64_t ret=0, len = strlen(name);
-    cprintf("%s %llu %llu %llu", name, len, binary, size);
     asm volatile(
         "li a0, %1\n"
         "lw a1, %2\n"
@@ -837,7 +834,7 @@ user_main(void *arg) {
 #ifdef TEST
     KERNEL_EXECVE2(TEST, TESTSTART, TESTSIZE);
 #else
-    KERNEL_EXECVE(hello);
+    KERNEL_EXECVE(exit);
 #endif
     panic("user_main execve failed.\n");
 }
