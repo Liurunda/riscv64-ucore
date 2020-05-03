@@ -24,19 +24,16 @@ static inline uint64_t get_cycles(void) {
 #endif
 }
 
-static uint64_t timebase;
+static uint64_t timebase = 100000;
 
 /* *
  * clock_init - initialize 8253 clock to interrupt 100 times per second,
  * and then enable IRQ_TIMER.
  * */
 void clock_init(void) {
-    // divided by 500 when using Spike(2MHz)
-    // divided by 100 when using QEMU(10MHz)
-    timebase = 1e7 / 100;
-    clock_set_next_event();
     set_csr(sie, MIP_STIP);
 
+    clock_set_next_event();
     // initialize time counter 'ticks' to zero
     ticks = 0;
 

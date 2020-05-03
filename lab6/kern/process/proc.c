@@ -834,7 +834,7 @@ user_main(void *arg) {
 #ifdef TEST
     KERNEL_EXECVE2(TEST, TESTSTART, TESTSIZE);
 #else
-    KERNEL_EXECVE(exit);
+    KERNEL_EXECVE(priority);
 #endif
     panic("user_main execve failed.\n");
 }
@@ -913,6 +913,7 @@ cpu_idle(void) {
 void
 lab6_set_priority(uint32_t priority)
 {
+    cprintf("set priority to %d\n", priority);
     if (priority == 0)
         current->lab6_priority = 1;
     else current->lab6_priority = priority;
