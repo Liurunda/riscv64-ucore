@@ -60,7 +60,7 @@ sys_putc(uint64_t arg[]) {
 
 static int
 sys_pgdir(uint64_t arg[]) {
-    print_pgdir();
+    //print_pgdir();
     return 0;
 }
 

@@ -30,21 +30,6 @@ uintptr_t boot_cr3;
 // physical memory management
 const struct pmm_manager *pmm_manager;
 
-/* *
- * The page directory entry corresponding to the virtual address range
- * [VPT, VPT + PTSIZE) points to the page directory itself. Thus, the page
- * directory is treated as a page table as well as a page directory.
- *
- * One result of treating the page directory as a page table is that all PTEs
- * can be accessed though a "virtual page table" at virtual address VPT. And the
- * PTE for number n is stored in vpt[n].
- *
- * A second consequence is that the contents of the current page directory will
- * always available at virtual address PGADDR(PDX(VPT), PDX(VPT), 0), to which
- * vpd is set bellow.
- * */
-pde_t *const vpd = (pde_t *)PGADDR(PDX1(VPT), PDX1(VPT), PDX1(VPT), 0);
-
 static void check_alloc_page(void);
 static void check_pgdir(void);
 static void check_boot_pgdir(void);
@@ -111,11 +96,11 @@ size_t nr_free_pages(void) {
 static void page_init(void) {
     extern char kern_entry[];
 
-    va_pa_offset = KERNBASE - (uint_t)kern_entry;
+    va_pa_offset = KERNBASE - 0x80200000;
 
-    uint_t mem_begin = (uint_t)kern_entry;
-    uint_t mem_end = (8 << 20) + DRAM_BASE; // 8MB memory on qemu
-    uint_t mem_size = mem_end - mem_begin;
+    uint_t mem_begin = KERNEL_BEGIN_PADDR;
+    uint_t mem_end = PHYSICAL_MEMORY_END - KERNEL_BEGIN_PADDR;
+    uint_t mem_size = PHYSICAL_MEMORY_END;
 
     cprintf("physcial memory map:\n");
     cprintf("  memory: 0x%08lx, [0x%08lx, 0x%08lx].\n", mem_size, mem_begin,
@@ -215,23 +200,10 @@ void pmm_init(void) {
 
     static_assert(KERNBASE % PTSIZE == 0 && KERNTOP % PTSIZE == 0);
 
-    // recursively insert boot_pgdir in itself
-    // to form a virtual page table at virtual address VPT
-    boot_pgdir[PDX0(VPT)] = pte_create(PPN(boot_cr3), PAGE_TABLE_DIR);
-
-    // map all physical memory to linear memory with base linear addr KERNBASE
-    // linear_addr KERNBASE~KERNBASE+KMEMSIZE = phy_addr 0~KMEMSIZE
-    // But shouldn't use this map until enable_paging() & gdt_init() finished.
-    boot_map_segment(boot_pgdir, KERNBASE, KMEMSIZE, PADDR(KERNBASE),
-                     READ_WRITE_EXEC);
-
-    enable_paging();
-
     // now the basic virtual memory map(see memalyout.h) is established.
     // check the correctness of the basic virtual memory map.
     check_boot_pgdir();
 
-    // print_pgdir();
 
     kmalloc_init();
 }
@@ -583,7 +555,6 @@ static void check_boot_pgdir(void) {
         assert(PTE_ADDR(*ptep) == i);
     }
 
-    assert(PDE_ADDR(boot_pgdir[PDX0(VPT)]) == PADDR(boot_pgdir));
 
     assert(boot_pgdir[0] == 0);
 
@@ -656,53 +627,3 @@ static int get_pgtable_items(size_t left, size_t right, size_t start,
     return 0;
 }
 
-// print_pgdir - print the PDT&PT
-void print_pgdir(void) {
-    cprintf("-------------------- BEGIN --------------------\n");
-    size_t left, right = 0, perm;
-    while ((perm = get_pgtable_items(0, NPDEENTRY, right, vpd, &left,
-                                     &right)) != 0) {
-        cprintf("PDE(%03x) %08x-%08x %08x %s\n", right - left, left * PTSIZE,
-                right * PTSIZE, (right - left) * PTSIZE, perm2str(perm));
-
-        if ((perm & READ_WRITE_EXEC) != PAGE_TABLE_DIR) {
-            continue;
-        }
-
-        size_t l, r = left * NPTEENTRY;
-        uintptr_t i;
-        size_t old_l, old_r, old_perm = 0;
-        for (i = left; i < right; i++) {
-            while (1) {
-                perm = get_pgtable_items(
-                    i * NPTEENTRY, (i + 1) * NPTEENTRY, r,
-                    (uintptr_t *)(KADDR((uintptr_t)PDE_ADDR(vpd[i]))) -
-                        i * NPTEENTRY,
-                    &l, &r);
-
-                if (perm == 0) {
-                    break;
-                }
-
-                if (old_perm != perm) {
-                    if (old_perm != 0) {
-                        cprintf("  |-- PTE(%05x) %08x-%08x %08x %s\n",
-                                old_r - old_l, old_l * PGSIZE, old_r * PGSIZE,
-                                (old_r - old_l) * PGSIZE, perm2str(old_perm));
-                    }
-                    old_l = l;
-                    old_r = r;
-                    old_perm = perm;
-                } else {
-                    old_r = r;
-                }
-            }
-        }
-        if (old_perm != 0) {
-            cprintf("  |-- PTE(%05x) %08x-%08x %08x %s\n", old_r - old_l,
-                    old_l * PGSIZE, old_r * PGSIZE, (old_r - old_l) * PGSIZE,
-                    perm2str(old_perm));
-        }
-    }
-    cprintf("--------------------- END ---------------------\n");
-}
