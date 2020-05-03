@@ -52,7 +52,12 @@ gettime_msec(void) {
 }
 
 void
-lab6_setpriority(uint32_t priority)
+lab6_set_priority(uint32_t priority)
 {
     sys_lab6_set_priority(priority);
+}
+
+int
+sleep(unsigned int time) {
+    return sys_sleep(time);
 }

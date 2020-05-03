@@ -54,7 +54,7 @@ mm_create(void) {
         else mm->sm_priv = NULL;
         
         set_mm_count(mm, 0);
-        lock_init(&(mm->mm_lock));
+        sem_init(&(mm->mm_sem), 1);
     }    
     return mm;
 }

@@ -25,12 +25,12 @@ int
 main(void) {
      int i,time;
      memset(pids, 0, sizeof(pids));
-     lab6_setpriority(TOTAL + 1);
+     lab6_set_priority(TOTAL + 1);
 
      for (i = 0; i < TOTAL; i ++) {
           acc[i]=0;
           if ((pids[i] = fork()) == 0) {
-               lab6_setpriority(i + 1);
+               lab6_set_priority(i + 1);
                acc[i] = 0;
                while (1) {
                     spin_delay();
