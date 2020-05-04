@@ -111,6 +111,7 @@ alloc_proc(void) {
      *       uint32_t wait_state;                        // waiting state
      *       struct proc_struct *cptr, *yptr, *optr;     // relations between processes
      */
+    
         proc->state = PROC_UNINIT;
         proc->pid = -1;
         proc->runs = 0;
@@ -125,6 +126,14 @@ alloc_proc(void) {
         memset(proc->name, 0, PROC_NAME_LEN);
         proc->wait_state = 0;
         proc->cptr = proc->optr = proc->yptr = NULL;
+        proc->rq = NULL;
+        list_init(&(proc->run_link));
+        proc->time_slice = 0;
+        proc->lab6_run_pool.left = proc->lab6_run_pool.right = proc->lab6_run_pool.parent = NULL;
+        proc->lab6_stride = 0;
+        proc->lab6_priority = 0;
+        proc->filesp = NULL;
+    
     }
     return proc;
 }
@@ -369,6 +378,48 @@ copy_thread(struct proc_struct *proc, uintptr_t esp, struct trapframe *tf) {
     proc->context.ra = (uintptr_t)forkret;
     proc->context.sp = (uintptr_t)(proc->tf);
 }
+//copy_files&put_files function used by do_fork in LAB8
+//copy the files_struct from current to proc
+static int
+copy_files(uint32_t clone_flags, struct proc_struct *proc) {
+    struct files_struct *filesp, *old_filesp = current->filesp;
+    assert(old_filesp != NULL);
+
+    if (clone_flags & CLONE_FS) {
+        filesp = old_filesp;
+        goto good_files_struct;
+    }
+
+    int ret = -E_NO_MEM;
+    if ((filesp = files_create()) == NULL) {
+        goto bad_files_struct;
+    }
+
+    if ((ret = dup_files(filesp, old_filesp)) != 0) {
+        goto bad_dup_cleanup_fs;
+    }
+
+good_files_struct:
+    files_count_inc(filesp);
+    proc->filesp = filesp;
+    return 0;
+
+bad_dup_cleanup_fs:
+    files_destroy(filesp);
+bad_files_struct:
+    return ret;
+}
+
+//decrease the ref_count of files, and if ref_count==0, then destroy files_struct
+static void
+put_files(struct proc_struct *proc) {
+    struct files_struct *filesp = proc->filesp;
+    if (filesp != NULL) {
+        if (files_count_dec(filesp) == 0) {
+            files_destroy(filesp);
+        }
+    }
+}
 
 /* do_fork -     parent process for a new child process
  * @clone_flags: used to guide how to clone the child process
@@ -384,6 +435,7 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
     }
     ret = -E_NO_MEM;
     //LAB4:EXERCISE2 YOUR CODE
+    //LAB8:EXERCISE2 YOUR CODE  HINT:how to copy the fs in parent's proc_struct?
     /*
      * Some Useful MACROs, Functions and DEFINEs, you can use them in below implementation.
      * MACROs or Functions:
@@ -409,12 +461,12 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
     //    6. call wakeup_proc to make the new child process RUNNABLE
     //    7. set ret vaule using child proc's pid
 
-    //LAB5 YOUR CODE : (update LAB4 steps)
+  //LAB5 YOUR CODE : (update LAB4 steps)
    /* Some Functions
     *    set_links:  set the relation links of process.  ALSO SEE: remove_links:  lean the relation links of process
     *    -------------------
-    *    update step 1: set child proc's parent to current process, make sure current process's wait_state is 0
-    *    update step 5: insert proc_struct into hash_list && proc_list, set the relation links of process
+  *    update step 1: set child proc's parent to current process, make sure current process's wait_state is 0
+  *    update step 5: insert proc_struct into hash_list && proc_list, set the relation links of process
     */
     if ((proc = alloc_proc()) == NULL) {
         goto fork_out;
@@ -426,8 +478,11 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
     if (setup_kstack(proc) != 0) {
         goto bad_fork_cleanup_proc;
     }
-    if (copy_mm(clone_flags, proc) != 0) {
+    if (copy_files(clone_flags, proc) != 0) { //for LAB8
         goto bad_fork_cleanup_kstack;
+    }
+    if (copy_mm(clone_flags, proc) != 0) {
+        goto bad_fork_cleanup_fs;
     }
     copy_thread(proc, stack, tf);
 
@@ -446,12 +501,15 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
 fork_out:
     return ret;
 
+bad_fork_cleanup_fs:  //for LAB8
+    put_files(proc);
 bad_fork_cleanup_kstack:
     put_kstack(proc);
 bad_fork_cleanup_proc:
     kfree(proc);
     goto fork_out;
 }
+
 
 // do_exit - called by sys_exit
 //   1. call exit_mmap & put_pgdir & mm_destroy to free the almost all memory space of process
@@ -778,9 +836,11 @@ do_execve(const char *name, int argc, const char **argv) {
 
     /* sysfile_open will check the first argument path, thus we have to use a user-space pointer, and argv[0] may be incorrect */
     int fd;
+    cprintf("path is %s\n", path);
     if ((ret = fd = sysfile_open(path, O_RDONLY)) < 0) {
         goto execve_exit;
     }
+    cprintf("fd is %d\n", fd);
     if (mm != NULL) {
         lcr3(boot_cr3);
         if (mm_count_dec(mm) == 0) {
@@ -792,8 +852,10 @@ do_execve(const char *name, int argc, const char **argv) {
     }
     ret= -E_NO_MEM;;
     if ((ret = load_icode(fd, argc, kargv)) != 0) {
+        cputs("branch 1");
         goto execve_exit;
     }
+    cputs("branch 2");
     put_kargv(argc, kargv);
     set_proc_name(current, local_name);
     return 0;
@@ -936,7 +998,7 @@ user_main(void *arg) {
     KERNEL_EXECVE2(TEST);
 #endif
 #else
-    KERNEL_EXECVE(sh);
+    KERNEL_EXECVE(hello);
 #endif
     panic("user_main execve failed.\n");
 }
@@ -946,6 +1008,7 @@ static int
 init_main(void *arg) {
     cputs("init main");
     int ret;
+    cprintf("start: %llu\n", current->filesp);
     if ((ret = vfs_set_bootfs("disk0:")) != 0) {
         panic("set boot fs failed: %e.\n", ret);
     }
@@ -955,6 +1018,7 @@ init_main(void *arg) {
 
     cputs("fuck here");
     int pid = kernel_thread(user_main, NULL, 0);
+    cprintf("pid is %llu\n", pid);
     if (pid <= 0) {
         panic("create user_main failed.\n");
     }
@@ -1025,7 +1089,7 @@ void
 cpu_idle(void) {
     while (1) {
         if (current->need_resched) {
-	    cputs("schedule in cpu idle");
+	    cprintf("schedule in cpu idle %llu\n", current->filesp);
             schedule();
         }
     }

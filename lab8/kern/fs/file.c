@@ -24,6 +24,7 @@ get_fd_array(void) {
 // fd_array_init - initialize the open files table
 void
 fd_array_init(struct file *fd_array) {
+    cputs("fd array init!");
     int fd;
     struct file *file = fd_array;
     for (fd = 0; fd < FILES_STRUCT_NENTRY; fd ++, file ++) {
@@ -40,6 +41,7 @@ fd_array_alloc(int fd, struct file **file_store) {
     if (fd == NO_FD) {
         for (fd = 0; fd < FILES_STRUCT_NENTRY; fd ++, file ++) {
             if (file->status == FD_NONE) {
+                cprintf("find fd ==%d\n", fd);
                 goto found;
             }
         }

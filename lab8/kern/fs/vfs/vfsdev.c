@@ -10,7 +10,7 @@
 #include <unistd.h>
 #include <error.h>
 #include <assert.h>
-
+#include <proc.h>
 // device info entry in vdev_list 
 typedef struct {
     const char *devname;
@@ -223,23 +223,30 @@ find_mount(const char *devname, vfs_dev_t **vdev_store) {
 int
 vfs_mount(const char *devname, int (*mountfunc)(struct device *dev, struct fs **fs_store)) {
     int ret;
+    cprintf("%llu\n", current -> filesp);
     lock_vdev_list();
+    cprintf("%llu\n", current -> filesp);
     vfs_dev_t *vdev;
+    cprintf("%llu\n", current -> filesp);
     if ((ret = find_mount(devname, &vdev)) != 0) {
         goto out;
     }
+    cprintf("%llu\n", current -> filesp);
     if (vdev->fs != NULL) {
         ret = -E_BUSY;
         goto out;
     }
+    cprintf("%llu\n", current -> filesp);
     assert(vdev->devname != NULL && vdev->mountable);
 
     struct device *dev = vop_info(vdev->devnode, device);
     if ((ret = mountfunc(dev, &(vdev->fs))) == 0) {
+    cprintf("....%llu\n", current -> filesp);
         assert(vdev->fs != NULL);
         cprintf("vfs: mount %s.\n", vdev->devname);
     }
 
+    cprintf("%llu\n", current -> filesp);
 out:
     unlock_vdev_list();
     return ret;

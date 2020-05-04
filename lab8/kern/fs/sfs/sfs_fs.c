@@ -12,7 +12,7 @@
 #include <bitmap.h>
 #include <error.h>
 #include <assert.h>
-
+#include <proc.h>
 /*
  * sfs_sync - sync sfs's superblock and freemap in memroy into disk
  */
@@ -253,6 +253,7 @@ failed_cleanup_fs:
 
 int
 sfs_mount(const char *devname) {
+    cprintf("%llu\n", current->filesp);
     return vfs_mount(devname, sfs_do_mount);
 }
 

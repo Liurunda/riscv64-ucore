@@ -92,6 +92,7 @@ schedule(void) {
             next = idleproc;
         }
         next->runs ++;
+        cprintf("%d %d\n", current->pid, next->pid);
         if (next != current) {
             proc_run(next);
         }
