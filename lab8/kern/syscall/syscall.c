@@ -26,14 +26,12 @@ sys_wait(uint64_t arg[]) {
     int *store = (int *)arg[1];
     return do_wait(pid, store);
 }
-
 static int
 sys_exec(uint64_t arg[]) {
     const char *name = (const char *)arg[0];
-    size_t len = (size_t)arg[1];
-    unsigned char *binary = (unsigned char *)arg[2];
-    size_t size = (size_t)arg[3];
-    return do_execve(name, len, binary, size);
+    int argc = (int)arg[1];
+    const char **argv = (const char **)arg[2];
+    return do_execve(name, argc, argv);
 }
 
 static int

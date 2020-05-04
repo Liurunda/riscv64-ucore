@@ -9,6 +9,8 @@
 #define __noinline __attribute__((noinline))
 #define __noreturn __attribute__((noreturn))
 
+#define CHAR_BIT        8
+
 /* Represents true-or-false values */
 typedef long long bool;
 
@@ -39,7 +41,8 @@ typedef uint_t uintptr_t;
 
 /* size_t is used for memory object sizes */
 typedef uintptr_t size_t;
-
+/* off_t is used for file offsets and lengths */
+typedef intptr_t off_t;
 /* used for page numbers */
 typedef size_t ppn_t;
 
@@ -57,6 +60,12 @@ typedef size_t ppn_t;
             size_t __n = (size_t)(n);                               \
             (typeof(a))(ROUNDDOWN((size_t)(a) + __n - 1, __n));     \
         })
+
+/* Round up the result of dividing of n */
+#define ROUNDUP_DIV(a, n) ({                                        \
+uint64_t __n = (uint64_t)(n);                           \
+(typeof(a))(((a) + __n - 1) / __n);                     \
+})
 
 /* Return the offset of 'member' relative to the beginning of a struct type */
 #define offsetof(type, member)                                      \

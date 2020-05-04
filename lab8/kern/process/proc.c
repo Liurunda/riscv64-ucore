@@ -12,7 +12,9 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <unistd.h>
-
+#include <fs.h>
+#include <vfs.h>
+#include <sysfile.h>
 /* ------------- process/thread mechanism design&implementation -------------
 (an simplified Linux process/thread mechanism )
 introduction:
