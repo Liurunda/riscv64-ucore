@@ -253,7 +253,6 @@ failed_cleanup_fs:
 
 int
 sfs_mount(const char *devname) {
-    cprintf("%llu\n", current->filesp);
     return vfs_mount(devname, sfs_do_mount);
 }
 

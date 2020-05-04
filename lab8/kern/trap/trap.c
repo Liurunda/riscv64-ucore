@@ -274,7 +274,6 @@ static inline void trap_dispatch(struct trapframe* tf) {
 void
 trap(struct trapframe *tf) {
     // dispatch based on what type of trap occurred
-//    cputs("some trap");
     if (current == NULL) {
         trap_dispatch(tf);
     } else {

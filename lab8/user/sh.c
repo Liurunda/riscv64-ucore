@@ -48,6 +48,7 @@ gettoken(char **p1, char **p2) {
 
 char *
 readline(const char *prompt) {
+    cprintf("readline!");
     static char buffer[BUFSIZE];
     if (prompt != NULL) {
         printf("%s", prompt);
@@ -216,7 +217,7 @@ runit:
 
 int
 main(int argc, char **argv) {
-    printf("user sh is running!!!");
+    cprintf("user sh is running!!!");
     int ret, interactive = 1;
     if (argc == 2) {
         if ((ret = reopen(0, argv[1], O_RDONLY)) != 0) {

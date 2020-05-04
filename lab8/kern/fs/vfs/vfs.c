@@ -32,7 +32,6 @@ vfs_init(void) {
 // lock_bootfs - lock  for bootfs
 static void
 lock_bootfs(void) {
-    cprintf("lock bootfs %llu\n", current->filesp);
     down(&bootfs_sem);
 }
 // ulock_bootfs - ulock for bootfs
@@ -58,10 +57,8 @@ change_bootfs(struct inode *node) {
 // vfs_set_bootfs - change the dir of file system
 int
 vfs_set_bootfs(char *fsname) {
-    cprintf("set bootfs %llu\n", current->filesp);
     struct inode *node = NULL;
     if (fsname != NULL) {
-    cprintf("22333 bootfs %llu\n", current->filesp);
         char *s;
         if ((s = strchr(fsname, ':')) == NULL || s[1] != '\0') {
             return -E_INVAL;

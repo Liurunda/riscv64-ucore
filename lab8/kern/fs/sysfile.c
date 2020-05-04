@@ -45,7 +45,6 @@ sysfile_open(const char *__path, uint32_t open_flags) {
     if ((ret = copy_path(&path, __path)) != 0) {
         return ret;
     }
-    cputs("sysfile_open here");
     ret = file_open(path, open_flags);
     kfree(path);
     return ret;

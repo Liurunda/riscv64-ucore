@@ -631,7 +631,6 @@ load_icode(int fd, int argc, char **kargv) {
         ret = -E_INVAL_ELF;
         goto bad_elf_cleanup_pgdir;
     }
-
     struct proghdr __ph, *ph = &__ph;
     uint32_t vm_flags, perm, phnum;
     for (phnum = 0; phnum < elf->e_phnum; phnum ++) {
@@ -836,11 +835,9 @@ do_execve(const char *name, int argc, const char **argv) {
 
     /* sysfile_open will check the first argument path, thus we have to use a user-space pointer, and argv[0] may be incorrect */
     int fd;
-    cprintf("path is %s\n", path);
     if ((ret = fd = sysfile_open(path, O_RDONLY)) < 0) {
         goto execve_exit;
     }
-    cprintf("fd is %d\n", fd);
     if (mm != NULL) {
         lcr3(boot_cr3);
         if (mm_count_dec(mm) == 0) {
@@ -852,10 +849,8 @@ do_execve(const char *name, int argc, const char **argv) {
     }
     ret= -E_NO_MEM;;
     if ((ret = load_icode(fd, argc, kargv)) != 0) {
-        cputs("branch 1");
         goto execve_exit;
     }
-    cputs("branch 2");
     put_kargv(argc, kargv);
     set_proc_name(current, local_name);
     return 0;
@@ -970,7 +965,7 @@ kernel_execve(const char *name, const char **argv) {
         : "=m"(ret)
         : "i"(SYS_exec), "m"(name), "m"(argc), "m"(argv)
         : "memory");
-    cprintf("ret = %d\n", ret);
+//    cprintf("ret = %d\n", ret);
     return ret;
 }
 #define __KERNEL_EXECVE(name, path, ...) ({                         \
@@ -998,7 +993,7 @@ user_main(void *arg) {
     KERNEL_EXECVE2(TEST);
 #endif
 #else
-    KERNEL_EXECVE(hello);
+    KERNEL_EXECVE(sh);
 #endif
     panic("user_main execve failed.\n");
 }
@@ -1006,19 +1001,14 @@ user_main(void *arg) {
 // init_main - the second kernel thread used to create user_main kernel threads
 static int
 init_main(void *arg) {
-    cputs("init main");
     int ret;
-    cprintf("start: %llu\n", current->filesp);
     if ((ret = vfs_set_bootfs("disk0:")) != 0) {
         panic("set boot fs failed: %e.\n", ret);
     }
-    cputs("fuck here");
     size_t nr_free_pages_store = nr_free_pages();
     size_t kernel_allocated_store = kallocated();
 
-    cputs("fuck here");
     int pid = kernel_thread(user_main, NULL, 0);
-    cprintf("pid is %llu\n", pid);
     if (pid <= 0) {
         panic("create user_main failed.\n");
     }
@@ -1089,7 +1079,6 @@ void
 cpu_idle(void) {
     while (1) {
         if (current->need_resched) {
-	    cprintf("schedule in cpu idle %llu\n", current->filesp);
             schedule();
         }
     }

@@ -1,7 +1,7 @@
 #include <defs.h>
 #include <stdio.h>
 #include <console.h>
-
+#include <unistd.h>
 /* HIGH level console I/O */
 
 /* *
@@ -26,7 +26,7 @@ cputch(int c, int *cnt) {
 int
 vcprintf(const char *fmt, va_list ap) {
     int cnt = 0;
-    vprintfmt((void*)cputch, &cnt, fmt, ap);
+    vprintfmt((void*)cputch, NO_FD, &cnt, fmt, ap);
     return cnt;
 }
 

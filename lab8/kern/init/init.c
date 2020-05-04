@@ -43,7 +43,6 @@ kern_init(void) {
     
     ide_init();                 // init ide devices
     swap_init();                // init swap
-    cprintf("filesp is %llu\n", current->filesp);
     fs_init();
 
     clock_init();               // init clock interrupt
@@ -52,7 +51,6 @@ kern_init(void) {
     //LAB1: CAHLLENGE 1 If you try to do it, uncomment lab1_switch_test()
     // user/kernel mode switch test
     //lab1_switch_test();
-    cputs("finish init!!!!!");        
     cpu_idle();                 // run idle process
 }
 
