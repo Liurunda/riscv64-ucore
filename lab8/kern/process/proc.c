@@ -107,7 +107,7 @@ alloc_proc(void) {
      */
      //LAB5 YOUR CODE : (update LAB4 steps)
     /*
-     * below fields(add in LAB5) in proc_struct need to be initialized  
+     * below fields(add in LAB5) in proc_struct need to be initialized
      *       uint32_t wait_state;                        // waiting state
      *       struct proc_struct *cptr, *yptr, *optr;     // relations between processes
      */
@@ -125,13 +125,6 @@ alloc_proc(void) {
         memset(proc->name, 0, PROC_NAME_LEN);
         proc->wait_state = 0;
         proc->cptr = proc->optr = proc->yptr = NULL;
-        proc->rq = NULL;
-        list_init(&(proc->run_link));
-        proc->time_slice = 0;
-        proc->lab6_run_pool.left = proc->lab6_run_pool.right = proc->lab6_run_pool.parent = NULL;
-        proc->lab6_stride = 0;
-        proc->lab6_priority = 0;
-        proc->filesp = NULL;
     }
     return proc;
 }
@@ -267,7 +260,7 @@ find_proc(int pid) {
 }
 
 // kernel_thread - create a kernel thread using "fn" function
-// NOTE: the contents of temp trapframe tf will be copied to 
+// NOTE: the contents of temp trapframe tf will be copied to
 //       proc->tf in do_fork-->copy_thread function
 int
 kernel_thread(int (*fn)(void *), void *arg, uint32_t clone_flags) {
@@ -376,48 +369,7 @@ copy_thread(struct proc_struct *proc, uintptr_t esp, struct trapframe *tf) {
     proc->context.ra = (uintptr_t)forkret;
     proc->context.sp = (uintptr_t)(proc->tf);
 }
-//copy_files&put_files function used by do_fork in LAB8
-//copy the files_struct from current to proc
-static int
-copy_files(uint32_t clone_flags, struct proc_struct *proc) {
-    struct files_struct *filesp, *old_filesp = current->filesp;
-    assert(old_filesp != NULL);
 
-    if (clone_flags & CLONE_FS) {
-        filesp = old_filesp;
-        goto good_files_struct;
-    }
-
-    int ret = -E_NO_MEM;
-    if ((filesp = files_create()) == NULL) {
-        goto bad_files_struct;
-    }
-
-    if ((ret = dup_files(filesp, old_filesp)) != 0) {
-        goto bad_dup_cleanup_fs;
-    }
-
-good_files_struct:
-    files_count_inc(filesp);
-    proc->filesp = filesp;
-    return 0;
-
-bad_dup_cleanup_fs:
-    files_destroy(filesp);
-bad_files_struct:
-    return ret;
-}
-
-//decrease the ref_count of files, and if ref_count==0, then destroy files_struct
-static void
-put_files(struct proc_struct *proc) {
-    struct files_struct *filesp = proc->filesp;
-    if (filesp != NULL) {
-        if (files_count_dec(filesp) == 0) {
-            files_destroy(filesp);
-        }
-    }
-}
 /* do_fork -     parent process for a new child process
  * @clone_flags: used to guide how to clone the child process
  * @stack:       the parent's user stack pointer. if stack==0, It means to fork a kernel thread.
@@ -459,7 +411,7 @@ do_fork(uint32_t clone_flags, uintptr_t stack, struct trapframe *tf) {
 
     //LAB5 YOUR CODE : (update LAB4 steps)
    /* Some Functions
-    *    set_links:  set the relation links of process.  ALSO SEE: remove_links:  lean the relation links of process 
+    *    set_links:  set the relation links of process.  ALSO SEE: remove_links:  lean the relation links of process
     *    -------------------
     *    update step 1: set child proc's parent to current process, make sure current process's wait_state is 0
     *    update step 5: insert proc_struct into hash_list && proc_list, set the relation links of process
@@ -536,7 +488,7 @@ do_exit(int error_code) {
         while (current->cptr != NULL) {
             proc = current->cptr;
             current->cptr = proc->optr;
-    
+
             proc->yptr = NULL;
             if ((proc->optr = initproc->cptr) != NULL) {
                 initproc->cptr->yptr = proc;
@@ -554,6 +506,7 @@ do_exit(int error_code) {
     schedule();
     panic("do_exit will not return!! %d.\n", current->pid);
 }
+
 //load_icode_read is used by load_icode in LAB8
 static int
 load_icode_read(int fd, void *buf, size_t len, off_t offset) {
@@ -799,12 +752,12 @@ do_execve(const char *name, int argc, const char **argv) {
 
     char local_name[PROC_NAME_LEN + 1];
     memset(local_name, 0, sizeof(local_name));
-    
+
     char *kargv[EXEC_MAX_ARG_NUM];
     const char *path;
-    
+
     int ret = -E_INVAL;
-    
+
     lock_mm(mm);
     if (name == NULL) {
         snprintf(local_name, sizeof(local_name), "<null> %d", current->pid);
@@ -823,7 +776,7 @@ do_execve(const char *name, int argc, const char **argv) {
     unlock_mm(mm);
     files_closeall(current->filesp);
 
-    /* sysfile_open will check the first argument path, thus we have to use a user-space pointer, and argv[0] may be incorrect */    
+    /* sysfile_open will check the first argument path, thus we have to use a user-space pointer, and argv[0] may be incorrect */
     int fd;
     if ((ret = fd = sysfile_open(path, O_RDONLY)) < 0) {
         goto execve_exit;
@@ -850,7 +803,6 @@ execve_exit:
     do_exit(ret);
     panic("already exit: %e.\n", ret);
 }
-
 
 // do_yield - ask the scheduler to reschedule
 int
@@ -921,7 +873,6 @@ found:
     kfree(proc);
     return 0;
 }
-
 // do_kill - kill process with pid by set this process's flags with PF_EXITING
 int
 do_kill(int pid) {
@@ -941,51 +892,51 @@ do_kill(int pid) {
 
 // kernel_execve - do SYS_exec syscall to exec a user program called by user_main kernel_thread
 static int
-kernel_execve(const char *name, unsigned char *binary, size_t size) {
-    int64_t ret=0, len = strlen(name);
+kernel_execve(const char *name, const char **argv) {
+    int64_t argc = 0, ret;
+    while (argv[argc] != NULL){
+        argc++;
+    }
     asm volatile(
         "li a0, %1\n"
        "lw a1, %2\n"
         "lw a2, %3\n"
         "lw a3, %4\n"
-        "lw a4, %5\n"
    	"li a7, 10\n"
         "ebreak\n"
         "sw a0, %0\n"
         : "=m"(ret)
-        : "i"(SYS_exec), "m"(name), "m"(len), "m"(binary), "m"(size)
+        : "i"(SYS_exec), "m"(name), "m"(argc), "m"(argv)
         : "memory");
     cprintf("ret = %d\n", ret);
     return ret;
 }
+#define __KERNEL_EXECVE(name, path, ...) ({                         \
+const char *argv[] = {path, ##__VA_ARGS__, NULL};       \
+                     cprintf("kernel_execve: pid = %d, name = \"%s\".\n",    \
+                             current->pid, name);                            \
+                     kernel_execve(name, argv);                              \
+})
 
-#define __KERNEL_EXECVE(name, binary, size) ({                          \
-            cprintf("kernel_execve: pid = %d, name = \"%s\".\n",        \
-                    current->pid, name);                                \
-            kernel_execve(name, binary, (size_t)(size));                \
-        })
+#define KERNEL_EXECVE(x, ...)                   __KERNEL_EXECVE(#x, #x, ##__VA_ARGS__)
 
-#define KERNEL_EXECVE(x) ({                                             \
-            extern unsigned char _binary_obj___user_##x##_out_start[],  \
-                _binary_obj___user_##x##_out_size[];                    \
-            __KERNEL_EXECVE(#x, _binary_obj___user_##x##_out_start,     \
-                            _binary_obj___user_##x##_out_size);         \
-        })
+#define KERNEL_EXECVE2(x, ...)                  KERNEL_EXECVE(x, ##__VA_ARGS__)
 
-#define __KERNEL_EXECVE2(x, xstart, xsize) ({                           \
-            extern unsigned char xstart[], xsize[];                     \
-            __KERNEL_EXECVE(#x, xstart, (size_t)xsize);                 \
-        })
+#define __KERNEL_EXECVE3(x, s, ...)             KERNEL_EXECVE(x, #s, ##__VA_ARGS__)
 
-#define KERNEL_EXECVE2(x, xstart, xsize)        __KERNEL_EXECVE2(x, xstart, xsize)
+#define KERNEL_EXECVE3(x, s, ...)               __KERNEL_EXECVE3(x, s, ##__VA_ARGS__)
 
 // user_main - kernel thread used to exec a user program
 static int
 user_main(void *arg) {
 #ifdef TEST
-    KERNEL_EXECVE2(TEST, TESTSTART, TESTSIZE);
+#ifdef TESTSCRIPT
+    KERNEL_EXECVE3(TEST, TESTSCRIPT);
 #else
-    KERNEL_EXECVE(exit);
+    KERNEL_EXECVE2(TEST);
+#endif
+#else
+    KERNEL_EXECVE(sh);
 #endif
     panic("user_main execve failed.\n");
 }
@@ -993,13 +944,16 @@ user_main(void *arg) {
 // init_main - the second kernel thread used to create user_main kernel threads
 static int
 init_main(void *arg) {
+    cputs("init main");
     int ret;
     if ((ret = vfs_set_bootfs("disk0:")) != 0) {
         panic("set boot fs failed: %e.\n", ret);
     }
+    cputs("fuck here");
     size_t nr_free_pages_store = nr_free_pages();
     size_t kernel_allocated_store = kallocated();
 
+    cputs("fuck here");
     int pid = kernel_thread(user_main, NULL, 0);
     if (pid <= 0) {
         panic("create user_main failed.\n");
@@ -1071,6 +1025,7 @@ void
 cpu_idle(void) {
     while (1) {
         if (current->need_resched) {
+	    cputs("schedule in cpu idle");
             schedule();
         }
     }

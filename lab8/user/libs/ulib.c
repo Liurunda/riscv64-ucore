@@ -2,7 +2,8 @@
 #include <syscall.h>
 #include <stdio.h>
 #include <ulib.h>
-
+#include <stat.h>
+#include <lock.h>
 void
 exit(int error_code) {
     sys_exit(error_code);
@@ -60,4 +61,12 @@ lab6_set_priority(uint32_t priority)
 int
 sleep(unsigned int time) {
     return sys_sleep(time);
+}
+int
+__exec(const char *name, const char **argv) {
+    int argc = 0;
+    while (argv[argc] != NULL) {
+        argc ++;
+    }
+    return sys_exec(name, argc, argv);
 }

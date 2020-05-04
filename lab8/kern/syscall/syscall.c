@@ -6,7 +6,7 @@
 #include <pmm.h>
 #include <assert.h>
 #include <clock.h>
-
+#include <sysfile.h>
 static int
 sys_exit(uint64_t arg[]) {
     int error_code = (int)arg[0];

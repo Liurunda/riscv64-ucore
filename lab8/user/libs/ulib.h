@@ -34,6 +34,7 @@ void print_pgdir(void);
 unsigned int gettime_msec(void);
 void lab6_set_priority(uint32_t priority);
 int sleep(unsigned int time);
-
+int fprintf(int fd, const char *fmt, ...);
+int __exec(const char *name, const char **argv);
 #endif /* !__USER_LIBS_ULIB_H__ */
 

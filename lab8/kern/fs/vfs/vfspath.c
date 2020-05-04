@@ -28,6 +28,8 @@ set_cwd_nolock(struct inode *pwd) {
  */
 static void
 lock_cfs(void) {
+    cputs("lock cfs");
+    cprintf("filesp is %lld\n", current->filesp);
     lock_files(current->filesp);
 }
 /*
@@ -58,8 +60,10 @@ vfs_get_curdir(struct inode **dir_store) {
  */
 int
 vfs_set_curdir(struct inode *dir) {
+    cputs("vfs set curdir");
     int ret = 0;
     lock_cfs();
+    cputs("A");
     struct inode *old_dir;
     if ((old_dir = get_cwd_nolock()) != dir) {
         if (dir != NULL) {
@@ -89,12 +93,18 @@ out:
  */
 int
 vfs_chdir(char *path) {
+    cputs("vfs chdir");
     int ret;
     struct inode *node;
+    cputs("a");
     if ((ret = vfs_lookup(path, &node)) == 0) {
+        cputs("b");
         ret = vfs_set_curdir(node);
+        cputs("half");
         vop_ref_dec(node);
+        cputs("c");
     }
+    cputs("d");
     return ret;
 }
 /*

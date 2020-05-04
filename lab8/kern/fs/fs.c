@@ -22,6 +22,8 @@ fs_cleanup(void) {
 
 void
 lock_files(struct files_struct *filesp) {
+    cputs("ahahahaa");
+    cprintf("%lld %lld\n",filesp, &(filesp->files_sem));
     down(&(filesp->files_sem));
 }
 
