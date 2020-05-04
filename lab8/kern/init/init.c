@@ -43,6 +43,7 @@ kern_init(void) {
     
     ide_init();                 // init ide devices
     swap_init();                // init swap
+    cprintf("filesp is %llu\n", current->filesp);
     fs_init();
 
     clock_init();               // init clock interrupt
