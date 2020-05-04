@@ -27,3 +27,4 @@
 - [lab4: 进程管理](lab4/intro.md)
   - [进程与线程](lab4/1_process.md)
   - [相关数据结构](lab4/2_struct.md)
+  - [进程模块初始化](lab4/3_init.md)
