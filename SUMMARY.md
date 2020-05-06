@@ -29,3 +29,4 @@
   - [相关数据结构](lab4/2_struct.md)
   - [进程模块初始化](lab4/3_init.md)
   - [进程切换](lab4/4_switch.md)
+- [lab5: 用户程序](lab5/intro.md)

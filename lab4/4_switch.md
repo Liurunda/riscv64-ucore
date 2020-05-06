@@ -105,3 +105,5 @@ kernel_thread_entry:        # void kernel_thread(void)
 ```
 
 我们把参数放在了`a0`寄存器，并跳转到`s0`执行我们指定的函数！这样，一个进程的初始化就完成了。至此，我们实现了基本的进程管理，并且成功创建并切换到了我们的第一个内核进程。
+
+lab4的代码可以在[这里](https://github.com/Liurunda/riscv64-ucore/tree/lab4/)找到
