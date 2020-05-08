@@ -6,7 +6,7 @@
 #define MAX_ARGS            5
 
 static inline int
-syscall(int num, ...) {
+syscall(int64_t num, ...) {
     va_list ap;
     va_start(ap, num);
     uint64_t a[MAX_ARGS];
@@ -32,7 +32,7 @@ syscall(int num, ...) {
 }
 
 int
-sys_exit(int error_code) {
+sys_exit(int64_t error_code) {
     return syscall(SYS_exit, error_code);
 }
 
@@ -42,7 +42,7 @@ sys_fork(void) {
 }
 
 int
-sys_wait(int pid, int *store) {
+sys_wait(int64_t pid, int *store) {
     return syscall(SYS_wait, pid, store);
 }
 
@@ -52,7 +52,7 @@ sys_yield(void) {
 }
 
 int
-sys_kill(int pid) {
+sys_kill(int64_t pid) {
     return syscall(SYS_kill, pid);
 }
 
@@ -62,7 +62,7 @@ sys_getpid(void) {
 }
 
 int
-sys_putc(int c) {
+sys_putc(int64_t c) {
     return syscall(SYS_putc, c);
 }
 
