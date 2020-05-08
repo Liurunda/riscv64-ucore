@@ -792,7 +792,8 @@ do_kill(int pid) {
 static int
 kernel_execve(const char *name, unsigned char *binary, size_t size) {
     int64_t ret=0, len = strlen(name);
-    asm volatile(
+    ret = do_execve(name, len, binary, size);
+ /*   asm volatile(
         "li a0, %1\n"
         "lw a1, %2\n"
         "lw a2, %3\n"
@@ -803,7 +804,7 @@ kernel_execve(const char *name, unsigned char *binary, size_t size) {
         "sw a0, %0\n"
         : "=m"(ret)
         : "i"(SYS_exec), "m"(name), "m"(len), "m"(binary), "m"(size)
-        : "memory");
+        : "memory");*/
     cprintf("ret = %d\n", ret);
     return ret;
 }
