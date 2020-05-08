@@ -32,3 +32,4 @@
 - [lab5: 用户程序](lab5/intro.md)
   - [用户程序](lab5/1_user.md)
   - [system call!](lab5/2_syscall.md)
+  - [中断处理](lab5/3_trap.md)
