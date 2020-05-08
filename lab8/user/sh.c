@@ -48,7 +48,6 @@ gettoken(char **p1, char **p2) {
 
 char *
 readline(const char *prompt) {
-    cprintf("readline!");
     static char buffer[BUFSIZE];
     if (prompt != NULL) {
         printf("%s", prompt);
@@ -117,7 +116,7 @@ testfile(const char *name) {
 int
 runcmd(char *cmd) {
     static char argv0[BUFSIZE];
-    const char *argv[EXEC_MAX_ARG_NUM + 1];
+    static const char *argv[EXEC_MAX_ARG_NUM + 1];//must be static!
     char *t;
     int argc, token, ret, p[2];
 again:
@@ -212,7 +211,9 @@ runit:
         argv[0] = argv0;
     }
     argv[argc] = NULL;
-    return __exec(NULL, argv);
+    cprintf("in sh.c exec %s ", argv[0]);
+    cprintf(" argc = %d\n", argc);
+    return __exec(argv[0], argv);
 }
 
 int
@@ -237,6 +238,7 @@ main(int argc, char **argv) {
         shcwd[0] = '\0';
         int pid;
         if ((pid = fork()) == 0) {
+            cprintf("\n%s\n\n\n", buffer);
             ret = runcmd(buffer);
             exit(ret);
         }

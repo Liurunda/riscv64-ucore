@@ -24,7 +24,7 @@ static inline uint64_t get_cycles(void) {
 #endif
 }
 
-static uint64_t timebase = 100000;
+static uint64_t timebase = 1000000;
 
 /* *
  * clock_init - initialize 8253 clock to interrupt 100 times per second,

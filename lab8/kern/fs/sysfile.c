@@ -59,13 +59,11 @@ sysfile_close(int fd) {
 /* sysfile_read - read file */
 int
 sysfile_read(int fd, void *base, size_t len) {
-    cprintf("sysfile_read try to read %d %lld\n", fd, len);
     struct mm_struct *mm = current->mm;
     if (len == 0) {
         return 0;
     }
     if (!file_testfd(fd, 1, 0)) {
-        cprintf("GG\n");
         return -E_INVAL;
     }
     void *buffer;
@@ -73,7 +71,6 @@ sysfile_read(int fd, void *base, size_t len) {
         return -E_NO_MEM;
     }
 
-    cprintf("... sysfile_read try to read %d\n", fd);
     int ret = 0;
     size_t copied = 0, alen;
     while (len != 0) {

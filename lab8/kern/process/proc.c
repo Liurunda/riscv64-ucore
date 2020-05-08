@@ -780,9 +780,13 @@ copy_kargv(struct mm_struct *mm, int argc, char **kargv, const char **argv) {
     for (i = 0; i < argc; i ++) {
         char *buffer;
         if ((buffer = kmalloc(EXEC_MAX_ARG_LEN + 1)) == NULL) {
+            cputs("fuck A");
             goto failed_nomem;
         }
+       cprintf("argv[0] = %llu\n", (uintptr_t)argv[0]); 
         if (!copy_string(mm, buffer, argv[i], EXEC_MAX_ARG_LEN + 1)) {
+            cprintf("EXEC_MAX %d\n", EXEC_MAX_ARG_LEN);
+            cputs("fuck B");
             kfree(buffer);
             goto failed_cleanup;
         }
@@ -815,20 +819,24 @@ do_execve(const char *name, int argc, const char **argv) {
 
     int ret = -E_INVAL;
 
+    cputs("execve A");
     lock_mm(mm);
     if (name == NULL) {
         snprintf(local_name, sizeof(local_name), "<null> %d", current->pid);
     }
     else {
+        cprintf("name = %llu argv0 = %llu\n", (uintptr_t)(name), (uintptr_t)(argv[0]));
         if (!copy_string(mm, local_name, name, sizeof(local_name))) {
             unlock_mm(mm);
             return ret;
         }
     }
+    cputs("execve B");
     if ((ret = copy_kargv(mm, argc, kargv, argv)) != 0) {
         unlock_mm(mm);
         return ret;
     }
+    cputs("execve C");
     path = argv[0];
     unlock_mm(mm);
     files_closeall(current->filesp);

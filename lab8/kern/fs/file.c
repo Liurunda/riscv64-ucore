@@ -165,19 +165,16 @@ file_open(char *path, uint32_t open_flags) {
     default:
         return -E_INVAL;
     }
-
     int ret;
     struct file *file;
     if ((ret = fd_array_alloc(NO_FD, &file)) != 0) {
         return ret;
     }
-
     struct inode *node;
     if ((ret = vfs_open(path, open_flags, &node)) != 0) {
         fd_array_free(file);
         return ret;
     }
-
     file->pos = 0;
     if (open_flags & O_APPEND) {
         struct stat __stat, *stat = &__stat;
@@ -188,7 +185,6 @@ file_open(char *path, uint32_t open_flags) {
         }
         file->pos = stat->st_size;
     }
-
     file->node = node;
     file->readable = readable;
     file->writable = writable;

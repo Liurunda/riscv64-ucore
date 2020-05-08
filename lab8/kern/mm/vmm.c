@@ -501,11 +501,14 @@ bool copy_string(struct mm_struct *mm, char *dst, const char *src,
                  size_t maxn) {
     size_t alen,
         part = ROUNDDOWN((uintptr_t)src + PGSIZE, PGSIZE) - (uintptr_t)src;
+    cputs("?????");
     while (1) {
         if (part > maxn) {
             part = maxn;
         }
+        cprintf("%llu\n", (uintptr_t)src);
         if (!user_mem_check(mm, (uintptr_t)src, part, 0)) {
+            cputs("copy_string A");
             return 0;
         }
         if ((alen = strnlen(src, part)) < part) {
@@ -513,6 +516,7 @@ bool copy_string(struct mm_struct *mm, char *dst, const char *src,
             return 1;
         }
         if (part == maxn) {
+            cputs("copy string B");
             return 0;
         }
         memcpy(dst, src, part);
