@@ -31,7 +31,6 @@ sys_exec(uint64_t arg[]) {
     const char *name = (const char *)(arg[0]);
     int argc = (int)arg[1];
     const char **argv = (const char **)arg[2];
-    cprintf("name %llu argv[0] %llu\n", name, argv[0]);
     return do_execve(name, argc, argv);
 }
 

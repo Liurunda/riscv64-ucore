@@ -65,10 +65,8 @@ sleep(unsigned int time) {
 int
 __exec(const char *name, const char **argv) {
     int argc = 0;
-    cprintf("__exec name = %llu argv[0] = %llu\n", name, argv[0]);
     while (argv[argc] != NULL) {
         argc ++;
     }
-    cprintf("__exec argc= %d\n", argc);
     return sys_exec(name, argc, argv);
 }

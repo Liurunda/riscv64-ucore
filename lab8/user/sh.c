@@ -211,14 +211,12 @@ runit:
         argv[0] = argv0;
     }
     argv[argc] = NULL;
-    cprintf("in sh.c exec %s ", argv[0]);
-    cprintf(" argc = %d\n", argc);
     return __exec(argv[0], argv);
 }
 
 int
 main(int argc, char **argv) {
-    cprintf("user sh is running!!!");
+    cputs("user sh is running!!!");
     int ret, interactive = 1;
     if (argc == 2) {
         if ((ret = reopen(0, argv[1], O_RDONLY)) != 0) {
@@ -238,7 +236,6 @@ main(int argc, char **argv) {
         shcwd[0] = '\0';
         int pid;
         if ((pid = fork()) == 0) {
-            cprintf("\n%s\n\n\n", buffer);
             ret = runcmd(buffer);
             exit(ret);
         }
