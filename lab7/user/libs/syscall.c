@@ -6,27 +6,16 @@
 #define MAX_ARGS            5
 
 static inline int
-syscall(int num, ...) {
+syscall(int64_t num, ...) {
     va_list ap;
     va_start(ap, num);
-    uint32_t a[MAX_ARGS];
+    uint64_t a[MAX_ARGS];
     int i, ret;
     for (i = 0; i < MAX_ARGS; i ++) {
-        a[i] = va_arg(ap, uint32_t);
+        a[i] = va_arg(ap, uint64_t);
     }
     va_end(ap);
 
-    // asm volatile (
-    //     "int %1;"
-    //     : "=a" (ret)
-    //     : "i" (T_SYSCALL),
-    //       "a" (num),
-    //       "d" (a[0]),
-    //       "c" (a[1]),
-    //       "b" (a[2]),
-    //       "D" (a[3]),
-    //       "S" (a[4])
-    //     : "cc", "memory");
     asm volatile (
         "lw a0, %1\n"
         "lw a1, %2\n"
@@ -49,7 +38,7 @@ syscall(int num, ...) {
 }
 
 int
-sys_exit(int error_code) {
+sys_exit(int64_t error_code) {
     return syscall(SYS_exit, error_code);
 }
 
@@ -59,7 +48,7 @@ sys_fork(void) {
 }
 
 int
-sys_wait(int pid, int *store) {
+sys_wait(int64_t pid, int *store) {
     return syscall(SYS_wait, pid, store);
 }
 
@@ -69,7 +58,7 @@ sys_yield(void) {
 }
 
 int
-sys_kill(int pid) {
+sys_kill(int64_t pid) {
     return syscall(SYS_kill, pid);
 }
 
@@ -79,7 +68,7 @@ sys_getpid(void) {
 }
 
 int
-sys_putc(int c) {
+sys_putc(int64_t c) {
     return syscall(SYS_putc, c);
 }
 
@@ -94,12 +83,12 @@ sys_gettime(void) {
 }
 
 void
-sys_lab6_set_priority(uint32_t priority)
+sys_lab6_set_priority(uint64_t priority)
 {
     syscall(SYS_lab6_set_priority, priority);
 }
 
 int
-sys_sleep(unsigned int time) {
+sys_sleep(uint64_t time) {
     return syscall(SYS_sleep, time);
 }
