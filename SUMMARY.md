@@ -34,7 +34,7 @@
   - [system call!](lab5/2_syscall.md)
   - [中断处理](lab5/3_trap.md)
 - [lab6: 进程调度](lab6/intro.md)
-  - [深入理解进程切换](lab6/1_switch.md)
+  - [再次认识进程切换](lab6/1_switch.md)
   - [调度算法框架](lab6/2_schedule.md)
 - [lab8: 文件系统](lab8/intro.md)
   - [硬盘文件系统SFS](lab8/1_sfs.md)
