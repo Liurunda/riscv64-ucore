@@ -4,6 +4,47 @@
 
 进程初始化的函数定义在文件`kern/process/proc.c`中的`proc_init`。进程模块的初始化主要分为两步，首先创建第0个内核进程，`idle`。
 
+```c
+// kern/process/proc.c
+// proc_init - set up the first kernel thread idleproc "idle" by itself and 
+//           - create the second kernel thread init_main
+void
+proc_init(void) {
+    int i;
+
+    list_init(&proc_list);//进程链表
+    for (i = 0; i < HASH_LIST_SIZE; i ++) {
+        list_init(hash_list + i);
+    }
+
+    if ((idleproc = alloc_proc()) == NULL) { //分配"第0个"进程 idle
+        panic("cannot alloc idleproc.\n");
+    }
+
+    idleproc->pid = 0;
+    idleproc->state = PROC_RUNNABLE;
+    idleproc->kstack = (uintptr_t)bootstack;
+    idleproc->need_resched = 1;
+    set_proc_name(idleproc, "idle");
+    nr_process ++;
+	//全局变量current保存当前正在执行的进程
+    current = idleproc;
+
+    int pid = kernel_thread(init_main, "Hello world!!", 0);
+    if (pid <= 0) {
+        panic("create init_main failed.\n");
+    }
+
+    initproc = find_proc(pid);
+    set_proc_name(initproc, "init");
+
+    assert(idleproc != NULL && idleproc->pid == 0);
+    assert(initproc != NULL && initproc->pid == 1);
+}
+```
+
+
+
 在进程模块初始化时，首先需要初始化进程链表。进程链表就是把所有进程控制块串联起来的数据结构，可以记录和追踪每一个进程。然后，调用`proc_alloc`函数来为第一个进程分配其进程控制块。当我们的操作系统开始运行的时候，其实它已经可以被视作一个进程了。但是我们还没有为他设计好进程控制块，也就没法进行管理。`proc_alloc`函数会使用`kmalloc`分配一段空间来保存进程控制块，并且设定一些初值告诉我们这个进程目前还在初始化中。
 
 在分配完空间后，我们对于`idle`进程的控制块进行一定的初始化：
