@@ -39,7 +39,7 @@
 - [lab7: 同步互斥](lab7/intro.md)
   - [同步互斥的基本概念](lab7/1_concept.md)
   - [信号量](lab7/2_semaphore.md)
-  - [管程](lab7/3_monitor.md)
+  - [条件变量与管程](lab7/3_monitor.md)
 - [lab8: 文件系统](lab8/intro.md)
   - [硬盘文件系统SFS](lab8/1_sfs.md)
   - [设备即文件](lab8/2_device.md)
