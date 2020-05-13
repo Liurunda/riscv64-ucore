@@ -41,7 +41,7 @@
   - [信号量](lab7/2_semaphore.md)
   - [条件变量与管程](lab7/3_monitor.md)
 - [lab8: 文件系统](lab8/intro.md)
+  - [文件系统抽象层VFS](lab8/3_vfs.md)
   - [硬盘文件系统SFS](lab8/1_sfs.md)
   - [设备即文件](lab8/2_device.md)
-  - [文件系统抽象层VFS](lab8/3_vfs.md)
   - [从zhong duan 到 zhong duan](lab8/4_shell.md)
