@@ -153,7 +153,6 @@ void interrupt_handler(struct trapframe *tf) {
                 current->need_resched = 1;
             }
             run_timer_list();
-            serial_intr();
             dev_stdin_write(cons_getc());
             break;
         case IRQ_H_TIMER:
