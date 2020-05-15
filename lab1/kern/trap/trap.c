@@ -142,6 +142,8 @@ void exception_handler(struct trapframe *tf) {
         case CAUSE_ILLEGAL_INSTRUCTION:
             break;
         case CAUSE_BREAKPOINT:
+            cprintf("ebreak caught at 0x%016llx\n", tf->epc);
+            tf->epc += 2;
             break;
         case CAUSE_MISALIGNED_LOAD:
             break;
