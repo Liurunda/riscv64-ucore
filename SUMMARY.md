@@ -45,5 +45,5 @@
   - [硬盘文件系统SFS](lab8/1_sfs.md)
   - [设备即文件](lab8/2_device.md)
   - [从zhong duan 到 zhong duan](lab8/4_shell.md)
-- [练习题]
-  - [lab1](lab1/4_exercise.md)
+- [练习题](excercise/intro.md)
+  - [lab1](excercise/1_lab1.md)
