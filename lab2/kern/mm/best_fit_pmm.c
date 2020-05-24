@@ -1,7 +1,8 @@
 #include <pmm.h>
 #include <list.h>
 #include <string.h>
-#include <default_pmm.h>
+#include <best_fit_pmm.h>
+#include <stdio.h>
 
 /* In the first fit algorithm, the allocator keeps a list of free blocks (known as the free list) and,
    on receiving a request for memory, scans along the list for the first block that is large enough to
@@ -60,13 +61,13 @@ free_area_t free_area;
 #define nr_free (free_area.nr_free)
 
 static void
-default_init(void) {
+best_fit_init(void) {
     list_init(&free_list);
     nr_free = 0;
 }
 
 static void
-default_init_memmap(struct Page *base, size_t n) {
+best_fit_init_memmap(struct Page *base, size_t n) {
     assert(n > 0);
     struct Page *p = base;
     for (; p != base + n; p ++) {
@@ -94,18 +95,21 @@ default_init_memmap(struct Page *base, size_t n) {
 }
 
 static struct Page *
-default_alloc_pages(size_t n) {
+best_fit_alloc_pages(size_t n) {
     assert(n > 0);
     if (n > nr_free) {
         return NULL;
     }
     struct Page *page = NULL;
     list_entry_t *le = &free_list;
+    size_t min_size = nr_free + 1;
+    
     while ((le = list_next(le)) != &free_list) {
         struct Page *p = le2page(le, page_link);
-        if (p->property >= n) {
+        if (p->property >= n && p->property < min_size) {
             page = p;
-            break;
+            min_size = p->property;
+            //break;
         }
     }
     if (page != NULL) {
@@ -124,7 +128,7 @@ default_alloc_pages(size_t n) {
 }
 
 static void
-default_free_pages(struct Page *base, size_t n) {
+best_fit_free_pages(struct Page *base, size_t n) {
     assert(n > 0);
     struct Page *p = base;
     for (; p != base + n; p ++) {
@@ -174,7 +178,7 @@ default_free_pages(struct Page *base, size_t n) {
 }
 
 static size_t
-default_nr_free_pages(void) {
+best_fit_nr_free_pages(void) {
     return nr_free;
 }
 
@@ -232,7 +236,7 @@ basic_check(void) {
 // LAB2: below code is used to check the first fit allocation algorithm (your EXERCISE 1) 
 // NOTICE: You SHOULD NOT CHANGE basic_check, default_check functions!
 static void
-default_check(void) {
+best_fit_check(void) {
     int count = 0, total = 0;
     list_entry_t *le = &free_list;
     while ((le = list_next(le)) != &free_list) {
@@ -256,26 +260,18 @@ default_check(void) {
     unsigned int nr_free_store = nr_free;
     nr_free = 0;
 
-    free_pages(p0 + 2, 3);
+    // * - - * -
+    free_pages(p0 + 1, 2);
+    free_pages(p0 + 4, 1);
     assert(alloc_pages(4) == NULL);
-    assert(PageProperty(p0 + 2) && p0[2].property == 3);
-    assert((p1 = alloc_pages(3)) != NULL);
-    assert(alloc_page() == NULL);
-    assert(p0 + 2 == p1);
+    assert(PageProperty(p0 + 1) && p0[1].property == 2);
+    // * - - * *
+    assert((p1 = alloc_pages(1)) != NULL);
+    assert(alloc_pages(2) != NULL);      // best fit feature
+    assert(p0 + 4 == p1);
 
     p2 = p0 + 1;
-    free_page(p0);
-    free_pages(p1, 3);
-    assert(PageProperty(p0) && p0->property == 1);
-    assert(PageProperty(p1) && p1->property == 3);
-
-    assert((p0 = alloc_page()) == p2 - 1);
-    free_page(p0);
-    assert((p0 = alloc_pages(2)) == p2 + 1);
-
-    free_pages(p0, 2);
-    free_page(p2);
-
+    free_pages(p0, 5);
     assert((p0 = alloc_pages(5)) != NULL);
     assert(alloc_page() == NULL);
 
@@ -296,11 +292,11 @@ default_check(void) {
 //这个结构体在
 const struct pmm_manager best_fit_pmm_manager = {
     .name = "best_fit_pmm_manager",
-    .init = default_init,
-    .init_memmap = default_init_memmap,
-    .alloc_pages = default_alloc_pages,
-    .free_pages = default_free_pages,
-    .nr_free_pages = default_nr_free_pages,
-    .check = default_check,
+    .init = best_fit_init,
+    .init_memmap = best_fit_init_memmap,
+    .alloc_pages = best_fit_alloc_pages,
+    .free_pages = best_fit_free_pages,
+    .nr_free_pages = best_fit_nr_free_pages,
+    .check = best_fit_check,
 };
 
