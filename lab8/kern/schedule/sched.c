@@ -170,7 +170,7 @@ run_timer_list(void) {
                 timer = le2timer(le, timer_link);
             }
         }
-        sched_class_proc_tick(current);
+        if(current)sched_class_proc_tick(current);
     }
     local_intr_restore(intr_flag);
 }

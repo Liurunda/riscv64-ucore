@@ -147,11 +147,7 @@ void interrupt_handler(struct trapframe *tf) {
             // directly.
             // clear_csr(sip, SIP_STIP);
             clock_set_next_event();
-
-            if (++ticks % TICK_NUM == 0 && current) {
-                // print_ticks();
-                current->need_resched = 1;
-            }
+            ++ticks;
             run_timer_list();
             dev_stdin_write(cons_getc());
             break;
