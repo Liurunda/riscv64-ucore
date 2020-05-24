@@ -15,18 +15,14 @@ sem_init(semaphore_t *sem, int value) {
 
 static __noinline void __up(semaphore_t *sem, uint32_t wait_state) {
     bool intr_flag;
-    local_intr_save(intr_flag);
-    {
-        wait_t *wait;
-        if ((wait = wait_queue_first(&(sem->wait_queue))) == NULL) {
-            sem->value ++;
-        }
-        else {
-            assert(wait->proc->wait_state == wait_state);
-            wakeup_wait(&(sem->wait_queue), wait, wait_state, 1);
-        }
+    wait_t *wait;
+    if ((wait = wait_queue_first(&(sem->wait_queue))) == NULL) {
+        sem->value ++;
     }
-    local_intr_restore(intr_flag);
+    else {
+        assert(wait->proc->wait_state == wait_state);
+        wakeup_wait(&(sem->wait_queue), wait, wait_state, 1);
+    }
 }
 
 static __noinline uint32_t __down(semaphore_t *sem, uint32_t wait_state) {
@@ -34,7 +30,6 @@ static __noinline uint32_t __down(semaphore_t *sem, uint32_t wait_state) {
     local_intr_save(intr_flag);
     if (sem->value > 0) {
         sem->value --;
-        local_intr_restore(intr_flag);
         return 0;
     }
     wait_t __wait, *wait = &__wait;
