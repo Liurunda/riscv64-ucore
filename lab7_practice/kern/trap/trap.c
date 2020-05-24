@@ -147,7 +147,6 @@ void interrupt_handler(struct trapframe *tf) {
             // directly.
             // clear_csr(sip, SIP_STIP);
             clock_set_next_event();
-            ++ticks;
             run_timer_list();
             break;
         case IRQ_H_TIMER:
