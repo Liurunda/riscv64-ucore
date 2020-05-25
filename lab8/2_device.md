@@ -1,12 +1,12 @@
 # lab8 2/n 设备
 
-在本实验中，为了统一地访问设备(device)，我们可以把一个设备看成一个文件，通过访问文件的接口来访问设备。目前实现了 stdin 设备文件文件、stdout 设备文件、disk0 设备。stdin 设备就是键盘，stdout 设备就是 CONSOLE（串口、并口和文本显示器），而 disk0 设备是承载 SFS 文件系统的磁盘设备。下面我们逐一分析 ucore 是如何让用户把设备看成文件来访问。
+在本实验中，为了统一地访问设备(device)，我们可以把一个设备看成一个文件，通过访问文件的接口来访问设备。目前实现了 stdin 设备文件文件、stdout 设备文件、disk0 设备。stdin 设备就是键盘，stdout 设备就是控制台终端的文本显示，而 disk0 设备是承载 SFS 文件系统的磁盘设备。下面看看 ucore 是如何让用户把设备看成文件来访问。
 
 ### 设备的定义
 
 为了表示一个设备，需要有对应的数据结构，ucore 为此定义了 struct device，如下：
 
-可以认为`struct device`还是一个比较抽象的“设备”的定义。一个具体设备，只要实现了`d_open()`打开设备， `d_close()`关闭设备，`d_io()`(读写该设备，write参数是true/false决定是读还是写)，`d_ioctl()`(input/output control)四个函数接口，就可以被文件系统使用了。
+可以认为`struct device`是一个比较抽象的“设备”的定义。一个具体设备，只要实现了`d_open()`打开设备， `d_close()`关闭设备，`d_io()`(读写该设备，write参数是true/false决定是读还是写)，`d_ioctl()`(input/output control)四个函数接口，就可以被文件系统使用了。
 
 ```c
 // kern/fs/devs/dev.h
@@ -70,6 +70,29 @@ struct iobuf {
     off_t io_offset;   // current Rd/Wr position in buffer, will have been incremented by the amount transferred
     size_t io_len;     // the length of buffer  (used for Rd/Wr)
     size_t io_resid;   // current resident length need to Rd/Wr, will have been decremented by the amount transferred.
+};
+```
+
+
+
+注意设备文件的inode也有一个`inode_ops`成员, 提供设备文件应具备的接口。
+
+```c
+// kern/fs/devs/dev.c	
+/*
+ * Function table for device inodes.
+ */
+static const struct inode_ops dev_node_ops = {
+    .vop_magic                      = VOP_MAGIC,
+    .vop_open                       = dev_open,
+    .vop_close                      = dev_close,
+    .vop_read                       = dev_read,
+    .vop_write                      = dev_write,
+    .vop_fstat                      = dev_fstat,
+    .vop_ioctl                      = dev_ioctl,
+    .vop_gettype                    = dev_gettype,
+    .vop_tryseek                    = dev_tryseek,
+    .vop_lookup                     = dev_lookup,
 };
 ```
 

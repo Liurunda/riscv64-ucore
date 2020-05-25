@@ -157,7 +157,7 @@ static const struct inode_ops sfs_node_dirops = {
 
 对于目录操作而言，由于目录也是一种文件，所以 sfs_opendir、sys_close 对应户进程发出的 open、close 函数。相对于 sfs_open，sfs_opendir 只是完成一些 open 函数传递的参数判断，没做其他更多的事情。目录的 close 操作与文件的 close 操作完全一致。由于目录的内容数据与文件的内容数据不同，所以读出目录的内容数据的函数是 `sfs_getdirentry()`，其主要工作是获取目录下的文件 inode 信息。
 
-这里用到的`inode_ops`结构体，在`kern/fs/vfs/inode.h`定义，作用是：把关于`inode`的操作接口，集中在一个结构体里。这有什么作用？可以想象我们除了Simple File System, 还在另一块磁盘上使用完全不同的文件系统Complex File System，显然`vop_open(),vop_read()`这些接口的实现都要不一样了。对于同一个文件系统这些接口都是一样的，所以我们可以提供”属于SFS的文件的inode_ops结构体", “属于CFS的文件的inode_ops结构体"。
+这里用到的`inode_ops`结构体，在`kern/fs/vfs/inode.h`定义，作用是：把关于`inode`的操作接口，集中在一个结构体里， 通过这个结构体，我们可以把Simple File System的接口（如`sfs_openfile()`)提供给上层的VFS使用。可以想象我们除了Simple File System, 还在另一块磁盘上使用完全不同的文件系统Complex File System，显然`vop_open(),vop_read()`这些接口的实现都要不一样了。对于同一个文件系统这些接口都是一样的，所以我们可以提供”属于SFS的文件的inode_ops结构体", “属于CFS的文件的inode_ops结构体"。
 
 下面的注释里详细解释了每个接口的用途。当然，不必现在就详细了解每一个接口。
 
