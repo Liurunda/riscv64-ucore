@@ -11,6 +11,7 @@
   - ["真正的"入口点](lab0.5/3_kern_init.md)
   - [从SBI到stdio](lab0.5/4_sbi_io.md)
   - [Just make it](lab0.5/5_makeit.md)
+  - [项目组成](lab0.5/structure.md)
 - [lab1: 断, 都可以断](lab1/intro.md)
   - [掉进兔子洞(中断入口点)](lab1/1_trapentry.md)
   - [中断处理程序](lab1/2_trap.md)
