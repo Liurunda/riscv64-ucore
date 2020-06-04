@@ -71,3 +71,131 @@
 
 但在用户进程的执行过程中，具体在哪个时间段处于上述状态的呢？上述状态是如何转变的呢？首先，我们看创建（new）态，操作系统完成进程的创建工作，而体现进程存在的就是进程控制块，所以一旦操作系统创建了进程控制块，则可以认为此时进程就已经存在了，但由于进程能够运行的各种资源还没准备好，所以此时的进程处于创建（new）态。创建了进程控制块后，进程并不能就执行了，还需准备好各种资源，如果把进程执行所需要的虚拟内存空间，执行代码，要处理的数据等都准备好了，则此时进程已经可以执行了，但还没有被操作系统调度，需要等待操作系统选择这个进程执行，于是把这个做好“执行准备”的进程放入到一个队列中，并可以认为此时进程处于就绪（ready）态。当操作系统的调度器从就绪进程队列中选择了一个就绪进程后，通过执行进程切换，就让这个被选上的就绪进程执行了，此时进程就处于运行（running）态了。到了运行态后，会出现三种事件。如果进程需要等待某个事件（比如主动睡眠 10 秒钟，或进程访问某个内存空间，但此内存空间被换出到硬盘 swap 分区中了，进程不得不等待操作系统把缓慢的硬盘上的数据重新读回到内存中），那么操作系统会把 CPU 给其他进程执行，并把进程状态从运行（running）态转换为等待（blocked）态。如果用户进程的应用程序逻辑流程执行结束了，那么操作系统会把 CPU 给其他进程执行，并把进程状态从运行（running）态转换为退出（exit）态，并准备回收用户进程占用的各种资源，当把表示整个进程存在的进程控制块也回收了，这进程就不存在了。在这整个回收过程中，进程都处于退出（exit）态。2 考虑到在内存中存在多个处于就绪态的用户进程，但只有一个 CPU，所以为了公平起见，每个就绪态进程都只有有限的时间片段，当一个运行态的进程用完了它的时间片段后，操作系统会剥夺此进程的 CPU 使用权，并把此进程状态从运行（running）态转换为就绪（ready）态，最后把 CPU 给其他进程执行。如果某个处于等待（blocked）态的进程所等待的事件产生了（比如睡眠时间到，或需要访问的数据已经从硬盘换入到内存中），则操作系统会通过把等待此事件的进程状态从等待（blocked）态转到就绪（ready）态。这样进程的整个状态转换形成了一个有限状态自动机。
 
+## 项目组成
+
+```
+lab5
+├── Makefile
+├── boot
+│   ├── asm.h
+│   ├── bootasm.S
+│   └── bootmain.c
+├── kern
+│   ├── debug
+│   │   ├── assert.h
+│   │   ├── kdebug.c
+│   │   ├── kdebug.h
+│   │   ├── kmonitor.c
+│   │   ├── kmonitor.h
+│   │   ├── panic.c
+│   │   └── stab.h
+│   ├── driver
+│   │   ├── clock.c
+│   │   ├── clock.h
+│   │   ├── console.c
+│   │   ├── console.h
+│   │   ├── ide.c
+│   │   ├── ide.h
+│   │   ├── intr.c
+│   │   ├── intr.h
+│   │   ├── kbdreg.h
+│   │   ├── picirq.c
+│   │   └── picirq.h
+│   ├── fs
+│   │   ├── fs.h
+│   │   ├── swapfs.c
+│   │   └── swapfs.h
+│   ├── init
+│   │   ├── entry.S
+│   │   └── init.c
+│   ├── libs
+│   │   ├── readline.c
+│   │   └── stdio.c
+│   ├── mm
+│   │   ├── default_pmm.c
+│   │   ├── default_pmm.h
+│   │   ├── kmalloc.c
+│   │   ├── kmalloc.h
+│   │   ├── memlayout.h
+│   │   ├── mmu.h
+│   │   ├── pmm.c
+│   │   ├── pmm.h
+│   │   ├── swap.c
+│   │   ├── swap.h
+│   │   ├── swap_fifo.c
+│   │   ├── swap_fifo.h
+│   │   ├── vmm.c
+│   │   └── vmm.h
+│   ├── process
+│   │   ├── entry.S
+│   │   ├── proc.c
+│   │   ├── proc.h
+│   │   └── switch.S
+│   ├── schedule
+│   │   ├── sched.c
+│   │   └── sched.h
+│   ├── sync
+│   │   └── sync.h
+│   ├── syscall
+│   │   ├── syscall.c
+│   │   └── syscall.h
+│   └── trap
+│       ├── trap.c
+│       ├── trap.h
+│       └── trapentry.S
+├── lab5.md
+├── libs
+│   ├── atomic.h
+│   ├── defs.h
+│   ├── elf.h
+│   ├── error.h
+│   ├── hash.c
+│   ├── list.h
+│   ├── printfmt.c
+│   ├── rand.c
+│   ├── riscv.h
+│   ├── sbi.h
+│   ├── stdarg.h
+│   ├── stdio.h
+│   ├── stdlib.h
+│   ├── string.c
+│   ├── string.h
+│   └── unistd.h
+├── tools
+│   ├── boot.ld
+│   ├── function.mk
+│   ├── gdbinit
+│   ├── grade.sh
+│   ├── kernel.ld
+│   ├── sign.c
+│   ├── user.ld
+│   └── vector.c
+└── user
+    ├── badarg.c
+    ├── badsegment.c
+    ├── divzero.c
+    ├── exit.c
+    ├── faultread.c
+    ├── faultreadkernel.c
+    ├── forktest.c
+    ├── forktree.c
+    ├── hello.c
+    ├── libs
+    │   ├── initcode.S
+    │   ├── panic.c
+    │   ├── stdio.c
+    │   ├── syscall.c
+    │   ├── syscall.h
+    │   ├── ulib.c
+    │   ├── ulib.h
+    │   └── umain.c
+    ├── pgdir.c
+    ├── softint.c
+    ├── spin.c
+    ├── testbss.c
+    ├── waitkill.c
+    └── yield.c
+
+17 directories, 103 files
+```
+

@@ -6,3 +6,97 @@
 
 下面我们从一些进程的基本概念讲起，来看一看ucore是如何实现内核进程的~
 
+## 项目组成
+
+```
+lab4
+├── Makefile
+├── kern
+│   ├── debug
+│   │   ├── assert.h
+│   │   ├── kdebug.c
+│   │   ├── kdebug.h
+│   │   ├── kmonitor.c
+│   │   ├── kmonitor.h
+│   │   ├── panic.c
+│   │   └── stab.h
+│   ├── driver
+│   │   ├── clock.c
+│   │   ├── clock.h
+│   │   ├── console.c
+│   │   ├── console.h
+│   │   ├── ide.c
+│   │   ├── ide.h
+│   │   ├── intr.c
+│   │   ├── intr.h
+│   │   ├── kbdreg.h
+│   │   ├── picirq.c
+│   │   └── picirq.h
+│   ├── fs
+│   │   ├── fs.h
+│   │   ├── swapfs.c
+│   │   └── swapfs.h
+│   ├── init
+│   │   ├── entry.S
+│   │   └── init.c
+│   ├── libs
+│   │   ├── readline.c
+│   │   └── stdio.c
+│   ├── mm
+│   │   ├── default_pmm.c
+│   │   ├── default_pmm.h
+│   │   ├── kmalloc.c
+│   │   ├── kmalloc.h
+│   │   ├── memlayout.h
+│   │   ├── mmu.h
+│   │   ├── pmm.c
+│   │   ├── pmm.h
+│   │   ├── swap.c
+│   │   ├── swap.h
+│   │   ├── swap_fifo.c
+│   │   ├── swap_fifo.h
+│   │   ├── vmm.c
+│   │   └── vmm.h
+│   ├── process
+│   │   ├── entry.S
+│   │   ├── proc.c
+│   │   ├── proc.h
+│   │   └── switch.S
+│   ├── schedule
+│   │   ├── sched.c
+│   │   └── sched.h
+│   ├── sync
+│   │   └── sync.h
+│   └── trap
+│       ├── trap.c
+│       ├── trap.h
+│       └── trapentry.S
+├── lab4.md
+├── libs
+│   ├── atomic.h
+│   ├── defs.h
+│   ├── elf.h
+│   ├── error.h
+│   ├── hash.c
+│   ├── list.h
+│   ├── printfmt.c
+│   ├── rand.c
+│   ├── riscv.h
+│   ├── sbi.h
+│   ├── stdarg.h
+│   ├── stdio.h
+│   ├── stdlib.h
+│   ├── string.c
+│   └── string.h
+└── tools
+    ├── boot.ld
+    ├── function.mk
+    ├── gdbinit
+    ├── grade.sh
+    ├── kernel.ld
+    ├── sign.c
+    └── vector.c
+
+13 directories, 73 files
+```
+

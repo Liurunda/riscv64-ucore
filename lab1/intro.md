@@ -113,3 +113,64 @@ RISCV支持以下和中断相关的特权指令：
 **ebreak**(environment break)，执行这条指令会触发一个断点中断从而进入中断处理流程。
 
 **mret**，用于 M 态中断返回到 S 态或 U 态，实际作用为pc←mepc，回顾**sepc**定义，返回到通过中断进入 M 态之前的地址。（一般不用涉及）
+
+## 项目组成
+
+```
+lab1
+├── Makefile
+├── kern
+│   ├── debug
+│   │   ├── assert.h
+│   │   ├── kdebug.c
+│   │   ├── kdebug.h
+│   │   ├── kmonitor.c
+│   │   ├── kmonitor.h
+│   │   ├── panic.c
+│   │   └── stab.h
+│   ├── driver
+│   │   ├── clock.c
+│   │   ├── clock.h
+│   │   ├── console.c
+│   │   ├── console.h
+│   │   ├── intr.c
+│   │   └── intr.h
+│   ├── init
+│   │   ├── entry.S
+│   │   └── init.c
+│   ├── libs
+│   │   └── stdio.c
+│   ├── mm
+│   │   ├── memlayout.h
+│   │   ├── mmu.h
+│   │   ├── pmm.c
+│   │   └── pmm.h
+│   └── trap
+│       ├── trap.c
+│       ├── trap.h
+│       └── trapentry.S
+├── lab1.md
+├── libs
+│   ├── defs.h
+│   ├── error.h
+│   ├── printfmt.c
+│   ├── readline.c
+│   ├── riscv.h
+│   ├── sbi.c
+│   ├── sbi.h
+│   ├── stdarg.h
+│   ├── stdio.h
+│   ├── string.c
+│   └── string.h
+├── readme.md
+└── tools
+    ├── function.mk
+    ├── gdbinit
+    ├── grade.sh
+    ├── kernel.ld
+    ├── sign.c
+    └── vector.c
+
+9 directories, 43 files
+```
+

@@ -217,3 +217,85 @@ int kern_init(void){
 ```
 
 下面我们就来看看如何使用多级页表进行虚拟内存管理和页面置换。	
+
+## 项目组成
+
+```
+lab3
+├── Makefile
+├── kern
+│   ├── debug
+│   │   ├── assert.h
+│   │   ├── kdebug.c
+│   │   ├── kdebug.h
+│   │   ├── kmonitor.c
+│   │   ├── kmonitor.h
+│   │   ├── panic.c
+│   │   └── stab.h
+│   ├── driver
+│   │   ├── clock.c
+│   │   ├── clock.h
+│   │   ├── console.c
+│   │   ├── console.h
+│   │   ├── ide.c
+│   │   ├── ide.h
+│   │   ├── intr.c
+│   │   └── intr.h
+│   ├── fs
+│   │   ├── fs.h
+│   │   ├── swapfs.c
+│   │   └── swapfs.h
+│   ├── init
+│   │   ├── entry.S
+│   │   └── init.c
+│   ├── libs
+│   │   └── stdio.c
+│   ├── mm
+│   │   ├── default_pmm.c
+│   │   ├── default_pmm.h
+│   │   ├── memlayout.h
+│   │   ├── mmu.h
+│   │   ├── pmm.c
+│   │   ├── pmm.h
+│   │   ├── swap.c
+│   │   ├── swap.h
+│   │   ├── swap_clock.c
+│   │   ├── swap_clock.h
+│   │   ├── swap_fifo.c
+│   │   ├── swap_fifo.h
+│   │   ├── vmm.c
+│   │   └── vmm.h
+│   ├── sync
+│   │   └── sync.h
+│   └── trap
+│       ├── trap.c
+│       ├── trap.h
+│       └── trapentry.S
+├── lab3.md
+├── libs
+│   ├── atomic.h
+│   ├── defs.h
+│   ├── error.h
+│   ├── list.h
+│   ├── printfmt.c
+│   ├── rand.c
+│   ├── readline.c
+│   ├── riscv.h
+│   ├── sbi.h
+│   ├── stdarg.h
+│   ├── stdio.h
+│   ├── stdlib.h
+│   ├── string.c
+│   └── string.h
+└── tools
+    ├── boot.ld
+    ├── function.mk
+    ├── gdbinit
+    ├── grade.sh
+    ├── kernel.ld
+    ├── sign.c
+    └── vector.c
+
+11 directories, 62 files
+```
+

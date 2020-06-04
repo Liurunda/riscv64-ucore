@@ -22,3 +22,133 @@
   **6.** 重复3~6，直到进程执行完毕，通过`exit`进入`PROC_ZOMBIE`状态，由父进程对他的资源进行回收，释放进程控制块。至此，这个进程的生命周期彻底结束
 
 下面我们来看一看如何实现内核对于进程的调度。
+
+## 项目组成
+
+```
+lab6
+├── Makefile
+├── kern
+│   ├── debug
+│   │   ├── assert.h
+│   │   ├── kdebug.c
+│   │   ├── kdebug.h
+│   │   ├── kmonitor.c
+│   │   ├── kmonitor.h
+│   │   ├── panic.c
+│   │   └── stab.h
+│   ├── driver
+│   │   ├── clock.c
+│   │   ├── clock.h
+│   │   ├── console.c
+│   │   ├── console.h
+│   │   ├── ide.c
+│   │   ├── ide.h
+│   │   ├── intr.c
+│   │   ├── intr.h
+│   │   ├── kbdreg.h
+│   │   ├── picirq.c
+│   │   └── picirq.h
+│   ├── fs
+│   │   ├── fs.h
+│   │   ├── swapfs.c
+│   │   └── swapfs.h
+│   ├── init
+│   │   ├── entry.S
+│   │   └── init.c
+│   ├── libs
+│   │   ├── readline.c
+│   │   └── stdio.c
+│   ├── mm
+│   │   ├── default_pmm.c
+│   │   ├── default_pmm.h
+│   │   ├── kmalloc.c
+│   │   ├── kmalloc.h
+│   │   ├── memlayout.h
+│   │   ├── mmu.h
+│   │   ├── pmm.c
+│   │   ├── pmm.h
+│   │   ├── swap.c
+│   │   ├── swap.h
+│   │   ├── swap_fifo.c
+│   │   ├── swap_fifo.h
+│   │   ├── vmm.c
+│   │   └── vmm.h
+│   ├── process
+│   │   ├── entry.S
+│   │   ├── proc.c
+│   │   ├── proc.h
+│   │   └── switch.S
+│   ├── schedule
+│   │   ├── default_sched.h
+│   │   ├── default_sched_c
+│   │   ├── default_sched_stride.c
+│   │   ├── sched.c
+│   │   └── sched.h
+│   ├── sync
+│   │   └── sync.h
+│   ├── syscall
+│   │   ├── syscall.c
+│   │   └── syscall.h
+│   └── trap
+│       ├── trap.c
+│       ├── trap.h
+│       └── trapentry.S
+├── libs
+│   ├── atomic.h
+│   ├── defs.h
+│   ├── elf.h
+│   ├── error.h
+│   ├── hash.c
+│   ├── list.h
+│   ├── printfmt.c
+│   ├── rand.c
+│   ├── riscv.h
+│   ├── sbi.h
+│   ├── skew_heap.h
+│   ├── stdarg.h
+│   ├── stdio.h
+│   ├── stdlib.h
+│   ├── string.c
+│   ├── string.h
+│   └── unistd.h
+├── tools
+│   ├── boot.ld
+│   ├── function.mk
+│   ├── gdbinit
+│   ├── grade.sh
+│   ├── kernel.ld
+│   ├── sign.c
+│   ├── user.ld
+│   └── vector.c
+└── user
+    ├── badarg.c
+    ├── badsegment.c
+    ├── divzero.c
+    ├── exit.c
+    ├── faultread.c
+    ├── faultreadkernel.c
+    ├── forktest.c
+    ├── forktree.c
+    ├── hello.c
+    ├── libs
+    │   ├── initcode.S
+    │   ├── panic.c
+    │   ├── stdio.c
+    │   ├── syscall.c
+    │   ├── syscall.h
+    │   ├── ulib.c
+    │   ├── ulib.h
+    │   └── umain.c
+    ├── matrix.c
+    ├── pgdir.c
+    ├── priority.c
+    ├── softint.c
+    ├── spin.c
+    ├── testbss.c
+    ├── waitkill.c
+    └── yield.c
+
+16 directories, 105 files
+```
+
