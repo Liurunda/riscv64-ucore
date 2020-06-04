@@ -233,10 +233,11 @@ basic_check(void) {
     free_page(p2);
 }
 
-// LAB2: below code is used to check the first fit allocation algorithm (your EXERCISE 1) 
+// LAB2: below code is used to check the best fit allocation algorithm (your EXERCISE 1) 
 // NOTICE: You SHOULD NOT CHANGE basic_check, default_check functions!
 static void
 best_fit_check(void) {
+    int score = 0 ,sumscore = 6;
     int count = 0, total = 0;
     list_entry_t *le = &free_list;
     while ((le = list_next(le)) != &free_list) {
@@ -248,15 +249,27 @@ best_fit_check(void) {
 
     basic_check();
 
+    #ifdef ucore_test
+    score += 1;
+    cprintf("grading: %d / %d points\n",score, sumscore);
+    #endif
     struct Page *p0 = alloc_pages(5), *p1, *p2;
     assert(p0 != NULL);
     assert(!PageProperty(p0));
 
+    #ifdef ucore_test
+    score += 1;
+    cprintf("grading: %d / %d points\n",score, sumscore);
+    #endif
     list_entry_t free_list_store = free_list;
     list_init(&free_list);
     assert(list_empty(&free_list));
     assert(alloc_page() == NULL);
 
+    #ifdef ucore_test
+    score += 1;
+    cprintf("grading: %d / %d points\n",score, sumscore);
+    #endif
     unsigned int nr_free_store = nr_free;
     nr_free = 0;
 
@@ -270,11 +283,19 @@ best_fit_check(void) {
     assert(alloc_pages(2) != NULL);      // best fit feature
     assert(p0 + 4 == p1);
 
+    #ifdef ucore_test
+    score += 1;
+    cprintf("grading: %d / %d points\n",score, sumscore);
+    #endif
     p2 = p0 + 1;
     free_pages(p0, 5);
     assert((p0 = alloc_pages(5)) != NULL);
     assert(alloc_page() == NULL);
 
+    #ifdef ucore_test
+    score += 1;
+    cprintf("grading: %d / %d points\n",score, sumscore);
+    #endif
     assert(nr_free == 0);
     nr_free = nr_free_store;
 
@@ -288,6 +309,10 @@ best_fit_check(void) {
     }
     assert(count == 0);
     assert(total == 0);
+    #ifdef ucore_test
+    score += 1;
+    cprintf("grading: %d / %d points\n",score, sumscore);
+    #endif
 }
 //这个结构体在
 const struct pmm_manager best_fit_pmm_manager = {
