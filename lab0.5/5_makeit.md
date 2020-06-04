@@ -12,5 +12,4 @@
 
 目前为止的代码可以在[这里](https://github.com/Liurunda/riscv64-ucore/tree/lab0/lab0)找到，遇到困难可以参考。
 
-
-
+关于Makefile的语法, 如果不熟悉, 可以查看GNU手册, 或者这份中文教程: https://seisman.github.io/how-to-write-makefile/overview.html
