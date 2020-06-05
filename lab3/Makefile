@@ -63,9 +63,7 @@ include tools/function.mk
 
 listf_cc = $(call listf,$(1),$(CTYPE))
 
-# for cc
-add_files_cc = $(call add_files,$(1),$(CC),$(CFLAGS) $(3),$(2),$(4))
-create_target_cc = $(call create_target,$(1),$(2),$(3),$(CC),$(CFLAGS))
+
 
 # for hostcc
 add_files_host = $(call add_files,$(1),$(HOSTCC),$(HOSTCFLAGS),$(2),$(3))
@@ -86,10 +84,18 @@ match = $(shell echo $(2) | $(AWK) '{for(i=1;i<=NF;i++){if(match("$(1)","^"$$(i)
 INCLUDE	+= libs/
 
 CFLAGS	+= $(addprefix -I,$(INCLUDE))
-
 LIBDIR	+= libs
+CFLAGS2 := $(CFLAGS) -D ucore_test
+# for cc
+add_files_cc = $(call add_files,$(1),$(CC),$(CFLAGS) $(3),$(2),$(4))
+add_files_cc2 = $(call add_files,$(1),$(CC),$(CFLAGS2) $(3),$(2),$(4))
+create_target_cc = $(call create_target,$(1),$(2),$(3),$(CC),$(CFLAGS))
 
+ifeq ($(MAKECMDGOAL),test)
+$(call add_files_cc2,$(call listf_cc,$(LIBDIR)),libs,)
+else
 $(call add_files_cc,$(call listf_cc,$(LIBDIR)),libs,)
+endif
 
 # -------------------------------------------------------------------
 # kernel
@@ -169,7 +175,7 @@ qemu: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
 		-nographic \
 		-bios default \
 		-device loader,file=$(UCOREIMG),addr=0x80200000
-
+test: qemu
 spike: $(UCOREIMG) $(SWAPIMG) $(SFSIMG)
 	$(V)$(SPIKE) $(UCOREIMG)
 

@@ -87,46 +87,68 @@ _clock_swap_out_victim(struct mm_struct *mm, struct Page ** ptr_page, int in_tic
     }
     return 0;
 }
-
 static int
 _clock_check_swap(void) {
-    cprintf("write Virt Page c in clock_check_swap\n");
+#ifdef ucore_test
+    int score = 0, totalscore = 5;
+    cprintf("%d\n", &score);
+    ++ score; cprintf("grading %d/%d points", score, totalscore);
     *(unsigned char *)0x3000 = 0x0c;
     assert(pgfault_num==4);
-    cprintf("write Virt Page a in clock_check_swap\n");
     *(unsigned char *)0x1000 = 0x0a;
     assert(pgfault_num==4);
-    cprintf("write Virt Page d in clock_check_swap\n");
     *(unsigned char *)0x4000 = 0x0d;
     assert(pgfault_num==4);
-    cprintf("write Virt Page b in clock_check_swap\n");
     *(unsigned char *)0x2000 = 0x0b;
+    ++ score; cprintf("grading %d/%d points", score, totalscore);
     assert(pgfault_num==4);
-    cprintf("write Virt Page e in clock_check_swap\n");
     *(unsigned char *)0x5000 = 0x0e;
     assert(pgfault_num==5);
-    cprintf("write Virt Page b in clock_check_swap\n");
     *(unsigned char *)0x2000 = 0x0b;
     assert(pgfault_num==5);
-    cprintf("write Virt Page a in clock_check_swap\n");
+    ++ score; cprintf("grading %d/%d points", score, totalscore);
     *(unsigned char *)0x1000 = 0x0a;
-    assert(pgfault_num==6);
-    cprintf("write Virt Page b in clock_check_swap\n");
+    assert(pgfault_num==5);
     *(unsigned char *)0x2000 = 0x0b;
-    assert(pgfault_num==7);
-    cprintf("write Virt Page c in clock_check_swap\n");
+    assert(pgfault_num==5);
     *(unsigned char *)0x3000 = 0x0c;
-    assert(pgfault_num==8);
-    cprintf("write Virt Page d in clock_check_swap\n");
+    assert(pgfault_num==5);
+    ++ score; cprintf("grading %d/%d points", score, totalscore);
     *(unsigned char *)0x4000 = 0x0d;
-    assert(pgfault_num==9);
-    cprintf("write Virt Page e in clock_check_swap\n");
+    assert(pgfault_num==5);
     *(unsigned char *)0x5000 = 0x0e;
-    assert(pgfault_num==10);
-    cprintf("write Virt Page a in clock_check_swap\n");
+    assert(pgfault_num==5);
     assert(*(unsigned char *)0x1000 == 0x0a);
     *(unsigned char *)0x1000 = 0x0a;
-    assert(pgfault_num==11);
+    assert(pgfault_num==6);
+    ++ score; cprintf("grading %d/%d points", score, totalscore);
+#else 
+    *(unsigned char *)0x3000 = 0x0c;
+    assert(pgfault_num==4);
+    *(unsigned char *)0x1000 = 0x0a;
+    assert(pgfault_num==4);
+    *(unsigned char *)0x4000 = 0x0d;
+    assert(pgfault_num==4);
+    *(unsigned char *)0x2000 = 0x0b;
+    assert(pgfault_num==4);
+    *(unsigned char *)0x5000 = 0x0e;
+    assert(pgfault_num==5);
+    *(unsigned char *)0x2000 = 0x0b;
+    assert(pgfault_num==5);
+    *(unsigned char *)0x1000 = 0x0a;
+    assert(pgfault_num==5);
+    *(unsigned char *)0x2000 = 0x0b;
+    assert(pgfault_num==5);
+    *(unsigned char *)0x3000 = 0x0c;
+    assert(pgfault_num==5);
+    *(unsigned char *)0x4000 = 0x0d;
+    assert(pgfault_num==5);
+    *(unsigned char *)0x5000 = 0x0e;
+    assert(pgfault_num==5);
+    assert(*(unsigned char *)0x1000 == 0x0a);
+    *(unsigned char *)0x1000 = 0x0a;
+    assert(pgfault_num==6);
+#endif
     return 0;
 }
 
