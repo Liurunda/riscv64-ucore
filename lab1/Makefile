@@ -5,9 +5,7 @@ SLASH	:= /
 
 V       := @
 
-#ifndef GCCPREFIX
 GCCPREFIX := riscv64-unknown-elf-
-#endif
 
 ifndef QEMU
 QEMU := qemu-system-riscv64
@@ -59,6 +57,7 @@ ALLOBJS	:=
 ALLDEPS	:=
 TARGETS	:=
 
+# include some predefined function
 include tools/function.mk
 
 listf_cc = $(call listf,$(1),$(CTYPE))
