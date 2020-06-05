@@ -55,3 +55,5 @@
   - [lab6](excercise/6_lab6.md)
   - [lab7](excercise/7_lab7.md)
   - [lab8](excercise/8_lab8.md)
+- [附录](appendix/intro.md)
+  - [makefile](appendix/1_makefile.md)
