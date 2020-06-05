@@ -16,6 +16,7 @@
   - [掉进兔子洞(中断入口点)](lab1/1_trapentry.md)
   - [中断处理程序](lab1/2_trap.md)
   - [滴答滴答(时钟中断)](lab1/3_clock.md)
+  - [项目组成和执行流](lab1/structure.md)
 - [lab2: 物理内存和页表](lab2/intro.md)
   - [内核初始映射](lab2/1_init.md)
   - [物理内存管理](lab2/2_physical.md)
